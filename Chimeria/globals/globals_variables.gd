@@ -8,3 +8,4 @@ var forest = "forest";
 var mountain = "mountain";
 var desert = "desert";
 var sea = "sea";
+var shallow_watters = "shallow_watters"

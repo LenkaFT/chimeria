@@ -2,8 +2,8 @@ class_name	Tile
 
 var id = 0;
 var continent = -1;
-@export var size = 64;
-@export var sprite_scale = 0.5;
+@export var sprite_scale = 0.4
+@export var size = 64 * sprite_scale;
 var x = 0;
 var y = 0;
 var sprite = Sprite2D.new();

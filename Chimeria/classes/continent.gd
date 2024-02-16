@@ -12,16 +12,23 @@ var tile_expands_before_reset = 4;
 
 func is_able_to_expand(grid) :
 	
-	print("continent tiles array size in is_able : ", tiles_array.size());
 	for n in tiles_array.size() :
 		if (tiles_array[n].getNorthTile(grid) && tiles_array[n].getNorthTile(grid).continent == -1 ||
 		tiles_array[n].getSouthTile(grid) && tiles_array[n].getSouthTile(grid).continent == -1 ||
 		tiles_array[n].getEastTile(grid) && tiles_array[n].getEastTile(grid).continent == -1 ||
 		tiles_array[n].getWestTile(grid) && tiles_array[n].getWestTile(grid).continent == -1) :
-			print("is able")
 			return (true);
-	print("is not able")
 	return (false);
+	
+func get_able_to_expand_tiles_array(grid) :
+	var array : Array = [];
+	for n in tiles_array.size() :
+		if (tiles_array[n].getNorthTile(grid) && tiles_array[n].getNorthTile(grid).continent == -1 ||
+		tiles_array[n].getSouthTile(grid) && tiles_array[n].getSouthTile(grid).continent == -1 ||
+		tiles_array[n].getEastTile(grid) && tiles_array[n].getEastTile(grid).continent == -1 ||
+		tiles_array[n].getWestTile(grid) && tiles_array[n].getWestTile(grid).continent == -1) :
+			array.append(tiles_array[n])
+	return (array);
 	
 func calculate_size(availables_tiles : int, remaining_continents_to_create : int) :
 	randomize();
