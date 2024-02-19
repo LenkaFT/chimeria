@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://dcksgfgn1scjr"]
 
-[ext_resource type="Script" path="res://map.gd" id="1_r08ou"]
+[ext_resource type="Script" path="res://classes/map.gd" id="1_r08ou"]
 
 [node name="Node2D" type="Node2D"]
 
