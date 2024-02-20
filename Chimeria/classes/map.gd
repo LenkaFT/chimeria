@@ -1,8 +1,8 @@
 class_name Map
-extends CanvasGroup
+extends Node2D
 
-@export var grid_width = 50;
-@export var grid_height = 50;
+@export var grid_width = GV.map_width;
+@export var grid_height = GV.map_height;
 var number_of_tiles = grid_width * grid_height;
 @export var earth_to_sea_ratio = 0;
 @export var available_continent_tiles : int = earth_to_sea_ratio * number_of_tiles;
@@ -20,17 +20,12 @@ var grid = [];
 var tile_types = ["prairie", "forest", "mountain", "desert", "sea", "shallow_watters"];
 @export var continents_nb = 4;
 var continents_array : Array[Continent] = [];
+#var weather : WeatherForcast;
 
 func _init():
+	#weather = WeatherForcast.new(self.grid_width, self.grid_height);
 	create_map();
-		
-
-func _input(event):
-	if event is InputEventKey and event.pressed:
-		if event.keycode == KEY_SPACE:
-			var sprite = Sprite2D.new();
-			sprite.texture = load("res://sqr/blue_sqr.png");
-			add_child(sprite);
+	return ;
 			
 func get_tile_by_id(id : int) :
 	return (grid[id / grid_width - 1][id % grid_width]);
@@ -375,4 +370,4 @@ func create_map():
 		rework_continents(continents_array[n]);
 	place_islands(available_island_spots());
 	make_coast_shallow();
-	
+

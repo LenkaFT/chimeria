@@ -2,6 +2,11 @@ extends Node
 
 var tiles_types : Array = ["prairie", "forest", "mountain", "desert", "sea"];
 var direction_array :Array = ["North", "South", "East", "West"]
+var tile_size = 64;
+var sprite_scale = 0.5;
+var map_width = 50;
+var map_height = 40;
+
 
 var prairie = "prairie"; ##
 var marsh = "marsh";

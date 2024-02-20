@@ -40,3 +40,6 @@ var arctic_weights = {
 	
 	"total" : 100
 };
+
+#func balance_weights(tile : Tile, map : Map) :
+	

@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://c4ir2jlbdxjm6"]
+
+[ext_resource type="Script" path="res://classes/weather_forecast.gd" id="1_bmrls"]
+
+[node name="MapOverlays" type="Node2D"]
+top_level = true
+script = ExtResource("1_bmrls")

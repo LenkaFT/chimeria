@@ -57,15 +57,13 @@ func random_with_weights(weights : Dictionary):
 	randomize();
 	var rand = RandomNumberGenerator.new().randi_range(1, 100);
 	var cursor = 0;
-	var type : String;
 	for key in weights :
 		if key == "total" :
 			break;
 		cursor += weights[key];
 		if cursor >= rand :
 			type = key;
-			print("TYPE = ", type)
-			return (type);
+			return (key);
 			
 func is_able_to_expand(grid : Array, available_tiles : Array[Tile]) :
 	for n in tiles_array.size() :
