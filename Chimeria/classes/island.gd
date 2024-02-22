@@ -39,7 +39,7 @@ func _init(tile : Tile, island_max_size : int, map : Map) :
 	starting_tile = tile;
 	age_class = random_with_weights(age_weights)
 	
-	if tile.y < map.polar_circle || tile.y > map.grid_height - map.polar_circle:
+	if tile.y < map.north_polar_circle || tile.y > map.south_polar_circle:
 		init_arctic_weights();
 	elif tile.y > map.north_tropic && tile.y < map.south_tropic :
 		init_tropical_weights()
