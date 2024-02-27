@@ -4,7 +4,7 @@ extends Node2D
 @export var grid_width = GV.map_width;
 @export var grid_height = GV.map_height;
 var number_of_tiles = grid_width * grid_height;
-@export var earth_to_sea_ratio = 0;
+@export var earth_to_sea_ratio = 0.5;
 @export var available_continent_tiles : int = earth_to_sea_ratio * number_of_tiles;
 @export var island_distance_to_land = 4;
 @export var island_ratio = 0.002;
@@ -19,17 +19,12 @@ var south_polar_circle = grid_height - grid_height / 16;
 var tile_size = 64;
 var grid = [];
 var tile_types = ["prairie", "forest", "mountain", "desert", "sea", "shallow_watters"];
-@export var continents_nb = 4;
+@export var continents_nb = 3;
 var continents_array : Array[Continent] = [];
-#var weather : WeatherForcast;
+var tile_randomizer = TileRandomizer.new();
 
 func _init():
-	#weather = WeatherForcast.new(self.grid_width, self.grid_height);
-	create_map();
-	return ;
-			
-func get_tile_by_id(id : int) :
-	return (grid[id / grid_width - 1][id % grid_width]);
+	pass ;
 
 func random_tile_type():
 	randomize();
@@ -322,24 +317,7 @@ func available_island_spots() :
 				if distance >= island_distance_to_land - 1:
 					is_island_eligible_tile.append(grid[y][x]);
 	return (is_island_eligible_tile);
-		
-	
 
-#func place_island(eligible_tiles : Array[Tile]) :
-	#var new_tile : Tile;
-	#var tile : Tile;
-	#var random_index_array : Array[int] = [];
-	#var weights : Dictionary;
-	#randomize();
-	#for n in  eligible_tiles.size() * island_ratio:
-		#random_index_array.append(RandomNumberGenerator.new().randi_range(0, eligible_tiles.size() - 1))
-	#
-	#print(random_index_array);
-	#for n in random_index_array.size() :
-		#tile = eligible_tiles[random_index_array[n]];
-		#weights = generate_weights_according_to_surroundings(tile.x, tile.y, tile.id, tile.continent);
-		#new_tile = create_tile_instance(random_with_weights(weights),tile.x, tile.y, tile.id, tile.continent);
-		#replace_tile(new_tile.x, new_tile.y, new_tile);
 		
 func place_islands(eligible_tiles : Array[Tile]) :
 	randomize();
@@ -351,6 +329,26 @@ func place_islands(eligible_tiles : Array[Tile]) :
 	for n in random_index_array.size() :
 		var island = Island.new(eligible_tiles[random_index_array[n]], island_max_size, self);
 		island.expand_island(grid, eligible_tiles, self);
+
+func rework_map_according_to_weather(heat_grid, humidity_grid) :
+	for continent in continents_array :
+		for n in continent.tiles_array.size() :
+			var tile = continent.tiles_array[n];
+			var weights : Dictionary = generate_weights_according_to_surroundings(tile.x, tile.y, tile.id, continent.id);
+			var new_tile = tile_randomizer.randomize_tile(tile, self, heat_grid, humidity_grid);
+			replace_tile(tile.x, tile.y, new_tile);
+			continent.tiles_array[n] = new_tile;
+	for y in grid.size() :
+		for x in grid[y].size() :
+			if grid[y][x].category == "watter" && heat_grid[y][x] <= 0.20 :
+				randomize();
+				var rand = RandomNumberGenerator.new().randi();
+				if (heat_grid[y][x] <= 0.20 && rand % 8 == 0 ||
+				heat_grid[y][x] <= 0.15 && rand % 4 == 0 ||
+				heat_grid[y][x] <= 0.1 && rand % 2 == 0 ||
+				heat_grid[y][x] <= 0.05) :
+					var new_tile = IceCapTile.new(grid[y][x].x, grid[y][x].y, grid[y][x].id, grid[y][x].continent);
+					replace_tile(grid[y][x].x, grid[y][x].y, new_tile);
 
 func create_map():
 	var tile_id = 0;

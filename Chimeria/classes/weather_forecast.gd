@@ -8,11 +8,22 @@ var height : int = GV.map_height;
 var permutation : Array[int];
 var heat_overlay_requested : bool = false;
 var humidity_overlay_requested : bool = false;
+var world_map : Map;
+var perlin_square_frequency = 0.05;
 
 func _init():
+	pass ;
+	
+func create_heat_grid() :
+	permutation = [];
+	make_permutation();
+	perlin_noise(heat_grid, "heat");
+
+func create_humidity_grid(map : Map) :
+	world_map = map;
+	permutation = [];
 	make_permutation();
 	perlin_noise(humidity_grid, "humidity");
-	perlin_noise(heat_grid, "heat");
 
 func _draw():
 	var rect_width = GV.tile_size * GV.sprite_scale;
@@ -45,17 +56,32 @@ func _input(event):
 func value_normalisation(value : float, min : float, max : float) -> float :
 	return ((value - min) / (max - min));
 
-func grid_normalisation(grid, min, max) :
+func humidity_grid_normalisation(grid, min, max) :
 	for y in height :
 		for x in width :
 			grid[y][x] = value_normalisation(grid[y][x], min, max);
+
+func heat_grid_normalisation(grid, min, max) :
+	for y in height :
+		for x in width :
+			grid[y][x] = value_normalisation(grid[y][x], min, max);
+			if (y <= height / 2) :
+				var tweaker = value_normalisation(y, 0, height / 2) / 2;
+				grid[y][x] += (1 - grid[y][x]) * tweaker;
+			else :
+				var tweaker = (1.0 - value_normalisation(y, height / 2, height)) / 2;
+				grid[y][x] += (1 - grid[y][x]) * tweaker;
 
 func heat_map_value_tweak(y, value) :
 	if (y <= height / 2) :
 		return (value * value_normalisation(y, 0, height / 2));
 	else :
 		return (value * (1.0 - value_normalisation(y, height / 2, height)));
-
+		
+func humidity_map_value_tweak(x, y, value) :
+	if world_map.grid[y][x].category == "watter" :
+		return (value * 1);
+	return (value);
 
 func perlin_noise(grid, grid_type : String) :
 	var grid_min = 1;
@@ -67,22 +93,24 @@ func perlin_noise(grid, grid_type : String) :
 	for y in height :
 		grid.append([]);
 		for x in width :
-			var value : float = noise_2d(x * 0.1, y * 0.1);
+			var value : float = noise_2d(x * perlin_square_frequency, y * perlin_square_frequency);
 			value += 1.0;
 			if grid_type == "heat" :
 				value = heat_map_value_tweak(y, value);
-				
+			else :
+				value = humidity_map_value_tweak(x, y, value);
 			value /= 2.0;
-			#if grid_type == "humidity" :
-				#value = humidity_map_value_tweak(y, value);
 			grid[y].append(value);
 		
 		if grid[y].min() < grid_min :
 			grid_min = grid[y].min();
 		if grid[y].max() > grid_max :
 			grid_max = grid[y].max();
-		
-	grid_normalisation(grid, grid_min, grid_max);
+	
+	if grid_type == "heat" :
+		heat_grid_normalisation(grid, grid_min, grid_max);
+	else :
+		humidity_grid_normalisation(grid, grid_min, grid_max);
 
 func make_permutation() :
 	for n in 256 :
@@ -107,11 +135,6 @@ func perlin_fade(interpolation_value) :
 	interpolation_value * interpolation_value * interpolation_value);
 
 func linear_interpolation(interpolation_value, v1, v2) :
-	#print(v1)
-	#print(v2)
-	#print(v1 + interpolation_value * (v2 - v1));
-	#if (interpolation_value > 0.1 && interpolation_value < 0.9) :
-		#return (0)
 	return (v1 + interpolation_value * (v2 - v1));
 
 func noise_2d(x : float, y : float) :
@@ -122,7 +145,7 @@ func noise_2d(x : float, y : float) :
 	var xf = x - floor(x);
 	var yf = y - floor(y);
 	
-	if x * 10 >= width - width * 0.1 :
+	if x * 10 >= width - width * perlin_square_frequency :
 		X1 = 0;
 	
 	var top_right = Vector.new(xf - 1.0, yf - 1.0);
@@ -134,7 +157,6 @@ func noise_2d(x : float, y : float) :
 	var value_top_left = permutation[permutation[X] + Y + 1];
 	var value_bottom_right = permutation[permutation[X1] + Y];
 	var value_bottom_left = permutation[permutation[X] + Y];
-	#print(permutation[X + 1] + Y + 1, " | ", permutation[X] + Y + 1, " | ", permutation[X + 1] + Y, " | ", permutation[X] + Y, " | ");
 	
 	var dot_top_right = top_right.dot(get_constant_vector(value_top_right));
 	var dot_top_left = top_left.dot(get_constant_vector(value_top_left));
@@ -148,7 +170,3 @@ func noise_2d(x : float, y : float) :
 	linear_interpolation(yf_interpol_value, dot_bottom_left, dot_top_left),
 	linear_interpolation(yf_interpol_value, dot_bottom_right, dot_top_right)
 	));
-	#return (linear_interpolation(xf_interpol_value,
-	#linear_interpolation(yf_interpol_value, 1, 1),
-	#linear_interpolation(yf_interpol_value, 1,1)
-	#))
