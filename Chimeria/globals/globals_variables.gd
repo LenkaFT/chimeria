@@ -5,7 +5,7 @@ var direction_array :Array = ["North", "South", "East", "West"]
 var tile_size = 64;
 var sprite_scale = 0.25;
 var map_width = 100;
-var map_height = 60;
+var map_height = 80;
 
 
 var prairie = "prairie"; ##

@@ -8,7 +8,6 @@ var height : int = GV.map_height;
 var permutation : Array[int];
 var heat_overlay_requested : bool = false;
 var humidity_overlay_requested : bool = false;
-var world_map : Map;
 var perlin_square_frequency = 0.05;
 
 func _init():
@@ -20,7 +19,6 @@ func create_heat_grid() :
 	perlin_noise(heat_grid, "heat");
 
 func create_humidity_grid(map : Map) :
-	world_map = map;
 	permutation = [];
 	make_permutation();
 	perlin_noise(humidity_grid, "humidity");
@@ -77,11 +75,6 @@ func heat_map_value_tweak(y, value) :
 		return (value * value_normalisation(y, 0, height / 2));
 	else :
 		return (value * (1.0 - value_normalisation(y, height / 2, height)));
-		
-func humidity_map_value_tweak(x, y, value) :
-	if world_map.grid[y][x].category == "watter" :
-		return (value * 1);
-	return (value);
 
 func perlin_noise(grid, grid_type : String) :
 	var grid_min = 1;
@@ -97,8 +90,6 @@ func perlin_noise(grid, grid_type : String) :
 			value += 1.0;
 			if grid_type == "heat" :
 				value = heat_map_value_tweak(y, value);
-			else :
-				value = humidity_map_value_tweak(x, y, value);
 			value /= 2.0;
 			grid[y].append(value);
 		

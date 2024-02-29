@@ -6,6 +6,7 @@ var size_class : String;
 var starting_tile : Tile;
 var type : String;
 var tiles_array : Array[Tile];
+var tile_randomizer : TileRandomizer = TileRandomizer.new();
 var tile_weights : Dictionary;
 var size_weights : Dictionary = {
 	"very_small" : 30,	
@@ -99,7 +100,7 @@ func expand_island(grid : Array, available_tiles : Array[Tile], map : Map) :
 				break;
 			
 			else :
-				new_tile = map.create_tile_instance(random_with_weights(tile_weights) ,new_tile.x, new_tile.y, new_tile.id, -1);
+				new_tile = tile_randomizer.randomize_tile(new_tile, map, map.heat_grid, map.humidity_grid);
 				map.replace_tile(new_tile.x, new_tile.y, new_tile);
 				self.tiles_array.append(new_tile);
 				placed_tiles += 1;

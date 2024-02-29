@@ -100,7 +100,6 @@ func random_with_weights(weights : Dictionary):
 	var cursor = 0;
 	var type : String;
 	for key in weights :
-		print("cursor = ")
 		if key == "total" :
 			break;
 		cursor += weights[key];
@@ -116,14 +115,12 @@ func randomize_tile(tile : Tile, map : Map, heat_grid, humidity_grid) :
 		weights = hot_arid_weights ;
 	elif  heat_grid[tile.y][tile.x] < 0.2 :
 		weights = arctic_weights;
-	elif heat_grid[tile.y][tile.x] < 0.5 :
+	elif heat_grid[tile.y][tile.x] < 0.4 && humidity_grid[tile.y][tile.x] >= 0.5:
 		weights = cold_humid_weights;
-	elif heat_grid[tile.y][tile.x] < 0.5 && humidity_grid[tile.y][tile.x] < 0.4 :
+	elif heat_grid[tile.y][tile.x] < 0.4 && humidity_grid[tile.y][tile.x] < 0.5 :
 		weights = cold_arid_weights;
 	else : 
 		weights = temperate_weights;
 	
-	print("weights : ", weights);
 	var new_tile_type = random_with_weights(weights);
-	print(new_tile_type);
 	return(create_tile_instance(new_tile_type, tile.x, tile.y, tile.id, tile.continent));
