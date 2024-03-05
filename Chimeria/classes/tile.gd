@@ -2,8 +2,8 @@ class_name	Tile
 
 var id = 0;
 var continent = -1;
-@export var sprite_scale = GV.sprite_scale
-@export var size = GV.tile_size * sprite_scale;
+#@export var sprite_scale = GV.sprite_scale
+@export var size = GV.tile_size; #* sprite_scale;
 var x = 0;
 var y = 0;
 var sprite = Sprite2D.new();

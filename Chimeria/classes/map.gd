@@ -100,8 +100,8 @@ func generate_random_tile_with_weights(x : int, y : int, id : int, continentId :
 		return (create_tile_instance(type, x, y, id, continentId));
 
 func replace_tile(x : int, y : int, new_tile : Tile) :
-	remove_child(grid[y][x].sprite);
-	add_child(new_tile.sprite);
+	#remove_child(grid[y][x].sprite);
+	#add_child(new_tile.sprite);
 	grid[y][x] = new_tile;
 
 func place_continents():
@@ -115,7 +115,7 @@ func place_continents():
 		continents_array[n].epicenter_coo = {"x" : rand_x, "y" : rand_y};
 		continents_array[n].calculate_size(available_continent_tiles, continents_nb - n);
 		available_continent_tiles -= continents_array[n].size;
-		remove_child(grid[rand_y][rand_x].sprite);
+		#remove_child(grid[rand_y][rand_x].sprite);
 		replace_tile(rand_x, rand_y, 
 		continents_array[n].generate_starting_tile(rand_x, rand_y, grid[rand_y][rand_x].id, continents_array[n].id));
 
@@ -243,6 +243,38 @@ func place_islands(eligible_tiles : Array[Tile]) :
 		var island = Island.new(eligible_tiles[random_index_array[n]], island_max_size, self);
 		island.expand_island(grid, eligible_tiles, self);
 
+func display_map(top_left_x : int, top_left_y : int, visible_tiles_in_pov_x : int, visible_tiles_in_pov_y : int) :
+	
+	top_left_x = top_left_x / GV.tile_size;
+	top_left_y = top_left_y / GV.tile_size;
+	var it_count = top_left_x;
+	
+	
+	var y = top_left_y;
+	var x = top_left_x;
+	if visible_tiles_in_pov_y > GV.map_height :
+		visible_tiles_in_pov_y = GV.map_height;
+	
+	#print("visible tile in x : ", visible_tiles_in_pov_x, " | visible tile in y : ", visible_tiles_in_pov_y)
+	while y <= top_left_y + (visible_tiles_in_pov_y) :
+		print("y : ", y, " to : ", top_left_y + visible_tiles_in_pov_y);
+		it_count = 0;
+		x = top_left_x;
+		while x < 0 && it_count <= ( visible_tiles_in_pov_x) :
+			remove_child(grid[y][GV.map_width + (x % GV.map_width)].sprite);
+			grid[y][x % GV.map_width].sprite.position.x = x * GV.tile_size;
+			add_child(grid[y][GV.map_width + (x % GV.map_width)].sprite);
+			x += 1;
+			it_count += 1;
+		while x >= 0 && it_count <= (visible_tiles_in_pov_x):
+			print("x : ", x, " to : ", top_left_x + visible_tiles_in_pov_x);
+			remove_child(grid[y][x % GV.map_width].sprite);
+			grid[y][x % GV.map_width].sprite.position.x = x * GV.tile_size;
+			add_child(grid[y][x % GV.map_width].sprite);
+			x += 1;
+			it_count += 1;
+		y += 1;
+
 func create_map(heat_grid, humidity_grid):
 	self.humidity_grid = humidity_grid;
 	self.heat_grid = heat_grid;
@@ -251,7 +283,7 @@ func create_map(heat_grid, humidity_grid):
 		grid.append([])
 		for x in grid_width :
 			grid[y].append(SeaTile.new(x, y, tile_id, -1))
-			add_child(grid[y][x].sprite);
+			#add_child(grid[y][x].sprite);
 			tile_id += 1;
 	
 	place_continents();

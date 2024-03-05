@@ -18,13 +18,13 @@ func create_heat_grid() :
 	make_permutation();
 	perlin_noise(heat_grid, "heat");
 
-func create_humidity_grid(map : Map) :
+func create_humidity_grid() :
 	permutation = [];
 	make_permutation();
 	perlin_noise(humidity_grid, "humidity");
 
 func _draw():
-	var rect_width = GV.tile_size * GV.sprite_scale;
+	var rect_width = GV.tile_size; #* GV.sprite_scale;
 	
 	if heat_overlay_requested == true :
 		for y in heat_grid.size() : 
