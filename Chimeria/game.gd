@@ -54,27 +54,24 @@ func _input(event):
 		var new_zoom;
 		if event.button_index == MOUSE_BUTTON_WHEEL_DOWN and event.pressed :
 			if (camera.global_position.y + camera.get_viewport_rect().size.y) / GV.tile_size > GV.map_height / 2 :
-				print("offset -1");
 				camera.drag_vertical_offset = -1;
 			else :
-				print("offset 1");
 				camera.drag_vertical_offset = 1;
 			new_zoom = camera.zoom * Vector2(0.9,0.9);
 			if GV.map_height * (GV.tile_size * new_zoom.y) < camera.get_viewport_rect().size.y:
 				return ;
 			camera.set_zoom(new_zoom);
-			print("Zoom : ", camera.zoom);
 		if event.button_index == MOUSE_BUTTON_WHEEL_UP and event.pressed:
 			new_zoom = camera.zoom * Vector2(1.1, 1.1);
 			if new_zoom.x > 2 || new_zoom.y > 2:
 				return;
 			camera.set_zoom(new_zoom);
-			print("Zoom : ", camera.zoom);
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
 	var visible_tiles_in_pov_x = camera.get_viewport_rect().size.x / (camera.zoom.x * GV.tile_size)
 	var visible_tiles_in_pov_y = camera.get_viewport_rect().size.y / (camera.zoom.y * GV.tile_size)
+	print("camera x : ", camera.global_position.x, " | camera y : ", camera.global_position.y);
 	map.display_map(camera.global_position.x, camera.global_position.y, visible_tiles_in_pov_x, visible_tiles_in_pov_y)
 	#if camera.global_position.x + camera.get_window();
 	
