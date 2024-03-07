@@ -250,26 +250,27 @@ func display_map(top_left_x : int, top_left_y : int, visible_tiles_in_pov_x : in
 	var it_count = top_left_x;
 	var y = top_left_y;
 	var x = top_left_x;
+	var x_index;
 	if visible_tiles_in_pov_y > GV.map_height :
 		visible_tiles_in_pov_y = GV.map_height;
 	
-	while y <= top_left_y + (visible_tiles_in_pov_y) :
+	while y <= top_left_y + (visible_tiles_in_pov_y) && y < GV.map_height :
 		it_count = 0;
 		x = top_left_x;
-		#print("x : ", x, "visible tiles in x : ", visible_tiles_in_pov_x)
 		while x < 0 && it_count <= ( visible_tiles_in_pov_x) :
-			remove_child(grid[y][x % GV.map_width * -1].sprite);
-			print ("x < 0 = ", x, " | top left x : ",top_left_x);
-			grid[y][x % GV.map_width * -1].sprite.position.x = x * GV.tile_size;
-			print("sprite pos x < 0: ", grid[y][x % GV.map_width * -1].sprite.position.x, " Y : ", y)
-			add_child(grid[y][x % GV.map_width * -1].sprite);
+			x_index = GV.map_width - x % GV.map_width * -1;
+			if x_index == GV.map_width :
+				x_index = 0;
+			remove_child(grid[y][x_index].sprite);
+			grid[y][x_index].sprite.position.x = x * GV.tile_size;
+			add_child(grid[y][x_index].sprite);
 			x += 1;
 			it_count += 1;
 		while x >= 0 && it_count <= (visible_tiles_in_pov_x):
-			remove_child(grid[y][x % GV.map_width].sprite);
-			grid[y][x % GV.map_width].sprite.position.x = x * GV.tile_size;
-			print("sprite pos x >= 0: ", grid[y][x % GV.map_width].sprite.position.x, " Y : ", y)
-			add_child(grid[y][x % GV.map_width].sprite);
+			x_index = x % GV.map_width;
+			remove_child(grid[y][x_index].sprite);
+			grid[y][x_index].sprite.position.x = x * GV.tile_size;
+			add_child(grid[y][x_index].sprite);
 			x += 1;
 			it_count += 1;
 		y += 1;
