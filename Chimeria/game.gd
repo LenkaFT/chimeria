@@ -3,6 +3,10 @@ extends Node2D
 var map : Map;
 var weather_forecast : WeatherForcast;
 var camera : Camera2D;
+
+@export var max_zoom = 2;
+@export var min_zoom = 0.5;
+@export var zoom_intensity = 1.1;
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	camera = get_node("Camera2D");
@@ -37,26 +41,38 @@ func move_left() :
 func move_right() :
 	pass ;
 	
-func zoom_on_point(point, new_zoom : Vector2) :
-	var viewport_size = get_viewport_rect().size;
-	var new_camera_pos;
-	var camera_treshold = camera.limit_bottom - (camera.get_viewport_rect().size.y / (camera.zoom.y * GV.tile_size) * GV.tile_size);
+func zoom_in(point) :
+	var new_zoom = camera.zoom * 1.1;
+	var new_pos;
+	var camera_treshold = camera.limit_bottom - (camera.get_viewport_rect().size.y / (new_zoom.y * GV.tile_size) * GV.tile_size);
 	
-	#print("mouse pos : ", camera.global_position + (-0.5 * viewport_size + point))
-	#print ("zoom : ", camera.zoom)
-	#print ("new zoom ", new_zoom)
-	print("zoom - new_zoom : ", (camera.zoom - new_zoom))
-	#print("mouse pose * zoom : ", camera.global_position + (-0.5 * viewport_size + point) * (camera.zoom - new_zoom))
-	new_camera_pos = camera.global_position + (-0.5 * viewport_size + point) * (camera.zoom - new_zoom);
-	#print("global pos before : ", camera.global_position / GV.tile_size);
-	if new_camera_pos.y < 0 :
-		new_camera_pos.y = 0;
-	elif new_camera_pos.y > camera_treshold :
-		new_camera_pos = camera.global_position;
-	camera.global_position = new_camera_pos;
-	#print("global pos after : ", camera.global_position / GV.tile_size);
+	if new_zoom.x > max_zoom || new_zoom.y > max_zoom:
+		return;
+	new_pos = camera.global_position - (point / new_zoom - point / camera.zoom );
+	if new_pos.y < 0 :
+		new_pos.y = 0;
+	elif new_pos.y > camera_treshold :
+		new_pos.y = camera_treshold;
+	camera.global_position = new_pos;
+	camera.set_zoom(camera.zoom * zoom_intensity);
+
+func zoom_out(point) :
+	var new_zoom = camera.zoom / zoom_intensity;
+	var new_pos;
+	var camera_treshold = camera.limit_bottom - (camera.get_viewport_rect().size.y / (new_zoom.y * GV.tile_size) * GV.tile_size);	
+	
+	if (GV.map_height * (GV.tile_size * new_zoom.y) < camera.get_viewport_rect().size.y ||
+	GV.map_width * (GV.tile_size * new_zoom.x) < camera.get_viewport_rect().size.x) :
+		return ;
+	new_pos = camera.global_position - (point / new_zoom - point / camera.zoom );
+	
+	if new_pos.y < 0 :
+		new_pos.y = 0;
+	elif new_pos.y > camera_treshold:
+		new_pos.y = camera_treshold - (point.y / new_zoom.y - point.y / camera.zoom.y );
+	
+	camera.global_position = new_pos;
 	camera.set_zoom(new_zoom);
-	
 	
 func _input(event):
 	if event is InputEventKey and event.pressed:
@@ -73,45 +89,21 @@ func _input(event):
 			move_down();
 
 	elif event is InputEventMouseButton :
-		var new_zoom;
-		print("mouse pos : ", event.position)
+		#print("mouse pos : ", event.position)
 		if event.button_index == MOUSE_BUTTON_WHEEL_DOWN and event.pressed :
-			if (camera.global_position.y + camera.get_viewport_rect().size.y) / GV.tile_size > GV.map_height / 2 :
-				camera.drag_vertical_offset = -1;
-			else :
-				camera.drag_vertical_offset = 1;
-			new_zoom = camera.zoom * Vector2(1 / 1.1, 1 / 1.1);
-			if GV.map_height * (GV.tile_size * new_zoom.y) < camera.get_viewport_rect().size.y:
-				return ;
-			zoom_on_point(event.position, new_zoom);
-			#print("before zoom Camera pos : ", camera.global_position.x, " | ", camera.global_position.y);
-			#camera.set_zoom(new_zoom);
-			#print("after zoom Camera pos : ", camera.global_position.x, " | ", camera.global_position.y);
+			#if (camera.global_position.y + camera.get_viewport_rect().size.y) / GV.tile_size > GV.map_height / 2 :
+				#camera.drag_vertical_offset = -1;
+			#else :
+				#camera.drag_vertical_offset = 1;
+			zoom_out(event.position)
 			
 		if event.button_index == MOUSE_BUTTON_WHEEL_UP and event.pressed:
-			new_zoom = camera.zoom * Vector2(1.1, 1.1);
-			if new_zoom.x > 2 || new_zoom.y > 2:
-				return;
-			zoom_on_point(event.position, new_zoom);
-			#print("before zoom Camera pos : ", camera.global_position.x, " | ", camera.global_position.y);
-			#camera.set_zoom(new_zoom);
-			#print("after zoom Camera pos : ", camera.global_position.x, " | ", camera.global_position.y);
+			zoom_in(event.position);
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
 	var visible_tiles_in_pov_x = camera.get_viewport_rect().size.x / (camera.zoom.x * GV.tile_size);
 	var visible_tiles_in_pov_y = camera.get_viewport_rect().size.y / (camera.zoom.y * GV.tile_size);
-	#print("camera x : ", camera.global_position.x, " | camera y : ", camera.global_position.y);
 	map.display_map(camera.global_position.x, camera.global_position.y, visible_tiles_in_pov_x, visible_tiles_in_pov_y);
-	#if camera.global_position.x + camera.get_window();
-	
-	#if camera.global_position.x / GV.tile_size + (camera.get_viewport_rect().size.x / (camera.zoom.x * GV.tile_size)) > GV.map_width :
-		#print("OVER EDGES")
-	#else :
-		#print("window width : ", get_viewport_rect().size.x);
-		#print("tile size : ", GV.tile_size, " tile size * zoom lvl : ", (camera.zoom.x * GV.tile_size))
-		#print ("camera x : ", camera.global_position.x / GV.tile_size)
-		#print("camera right : ", (camera.get_viewport_rect().size.x / (camera.zoom.x * GV.tile_size)));
-		#print("sum : ", camera.global_position.x / GV.tile_size + (camera.get_viewport_rect().size.x / (camera.zoom.x * GV.tile_size)));
-		#print(GV.map_width);
+
 	pass

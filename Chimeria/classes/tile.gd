@@ -1,6 +1,7 @@
 class_name	Tile 
 
 var id = 0;
+var sprite_added_as_children = false;
 var continent = -1;
 #@export var sprite_scale = GV.sprite_scale
 @export var size = GV.tile_size; #* sprite_scale;

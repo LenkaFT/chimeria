@@ -253,7 +253,7 @@ func display_map(top_left_x : int, top_left_y : int, visible_tiles_in_pov_x : in
 	var x_index;
 	if visible_tiles_in_pov_y > GV.map_height :
 		visible_tiles_in_pov_y = GV.map_height;
-	
+	#print("TL x : ", top_left_x, " | TL y : ", top_left_y, " | visible tiles in y : ", visible_tiles_in_pov_y)
 	while y <= top_left_y + (visible_tiles_in_pov_y) && y < GV.map_height :
 		it_count = 0;
 		x = top_left_x;
@@ -261,16 +261,21 @@ func display_map(top_left_x : int, top_left_y : int, visible_tiles_in_pov_x : in
 			x_index = GV.map_width - x % GV.map_width * -1;
 			if x_index == GV.map_width :
 				x_index = 0;
-			remove_child(grid[y][x_index].sprite);
+			if grid[y][x_index].sprite_added_as_children == true :
+				remove_child(grid[y][x_index].sprite);
 			grid[y][x_index].sprite.position.x = x * GV.tile_size;
 			add_child(grid[y][x_index].sprite);
+			grid[y][x_index].sprite_added_as_children = true;
 			x += 1;
 			it_count += 1;
 		while x >= 0 && it_count <= (visible_tiles_in_pov_x):
 			x_index = x % GV.map_width;
-			remove_child(grid[y][x_index].sprite);
+			if grid[y][x_index].sprite_added_as_children == true :
+				remove_child(grid[y][x_index].sprite);
+				grid[y][x_index].sprite_added_as_children = false;
 			grid[y][x_index].sprite.position.x = x * GV.tile_size;
 			add_child(grid[y][x_index].sprite);
+			grid[y][x_index].sprite_added_as_children = true;
 			x += 1;
 			it_count += 1;
 		y += 1;
