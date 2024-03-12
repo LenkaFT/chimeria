@@ -25,7 +25,7 @@ func create_humidity_grid() :
 	perlin_noise(humidity_grid, "humidity");
 
 func draw_grid(grid, type) :
-	var rect_width = GV.tile_size; #* GV.sprite_scale;
+	var rect_width = GV.tile_size;
 	var visible_tiles_in_pov_x: int = 0;
 	var visible_tiles_in_pov_y : int = 0;
 	var top_left_x : int = 0;
@@ -37,6 +37,8 @@ func draw_grid(grid, type) :
 	var rgb;
 	var rect;
 	
+	#print("camera pos : ", camera.global_position)
+	
 	if camera :
 		visible_tiles_in_pov_x = ceil(camera.get_viewport_rect().size.x / (camera.zoom.x * GV.tile_size));
 		visible_tiles_in_pov_y = ceil(camera.get_viewport_rect().size.y / (camera.zoom.y * GV.tile_size));
@@ -44,12 +46,11 @@ func draw_grid(grid, type) :
 		top_left_y = floor(camera.global_position.y / GV.tile_size);
 		y = top_left_y;
 		x = top_left_x;
-	while y < visible_tiles_in_pov_y and y < GV.map_height : 
+	
+	while y <= top_left_y + visible_tiles_in_pov_y and y < GV.map_height : 
 		x = top_left_x;
 		it_count = 0;
 		while x < 0 && it_count <= visible_tiles_in_pov_x:
-			print("y : ", y * rect_width)
-			print("x < 0 : ", x * rect_width)
 			x_index = GV.map_width - x % GV.map_width * -1;
 			if x_index == GV.map_width :
 				x_index = 0;
@@ -61,9 +62,7 @@ func draw_grid(grid, type) :
 				draw_rect(rect, Color(1 - rgb, 1 - rgb, rgb, 0.6), true);
 			x += 1;
 			it_count += 1;
-		while x >= 0 && it_count <= visible_tiles_in_pov_x:
-			print("y : ", y * rect_width)
-			print("x >= 0 : ", x * rect_width)
+		while x >= 0 && it_count <= visible_tiles_in_pov_x :
 			x_index = x % GV.map_width;
 			rect = Rect2(x * rect_width, y * rect_width, rect_width, rect_width);
 			rgb = grid[y][x_index];
@@ -78,11 +77,11 @@ func draw_grid(grid, type) :
 func _draw():
 	
 	if heat_overlay_requested == true :
-		draw_grid(heat_grid, "heat")
+		draw_grid(heat_grid, "heat");
 		heat_overlay_requested = false;
 	
 	if humidity_overlay_requested == true :
-		draw_grid(humidity_grid, "humidity")
+		draw_grid(humidity_grid, "humidity");
 		humidity_overlay_requested = false;
 
 func draw_heat_map(cam : Camera2D) :
@@ -94,15 +93,9 @@ func draw_humidity_map(cam : Camera2D) :
 	camera = cam;
 	humidity_overlay_requested = true;
 	queue_redraw();
-	
-#func _input(event):
-	#if event is InputEventKey and event.pressed:
-		#if event.keycode == KEY_1:
-			#heat_overlay_requested = true;
-			#queue_redraw();
-		#if event.keycode == KEY_2:
-			#humidity_overlay_requested = true;
-			#queue_redraw();
+
+func remove_overlay() :
+	queue_redraw();
 
 func value_normalisation(value : float, min : float, max : float) -> float :
 	return ((value - min) / (max - min));
@@ -182,14 +175,13 @@ func linear_interpolation(interpolation_value, v1, v2) :
 	return (v1 + interpolation_value * (v2 - v1));
 
 func noise_2d(x : float, y : float) :
-	
 	var X : int = floori(x) & 255;
 	var X1 : int = X + 1;
 	var Y : int = floori(y) & 255;
 	var xf = x - floor(x);
 	var yf = y - floor(y);
 	
-	if x * 10 >= width - width * perlin_square_frequency :
+	if x >= width * perlin_square_frequency - 1 :
 		X1 = 0;
 	
 	var top_right = Vector.new(xf - 1.0, yf - 1.0);

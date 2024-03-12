@@ -257,23 +257,23 @@ func display_map(top_left_x : int, top_left_y : int, visible_tiles_in_pov_x : in
 	while y <= top_left_y + (visible_tiles_in_pov_y) && y < GV.map_height :
 		it_count = 0;
 		x = top_left_x;
-		while x < 0 && it_count <= ( visible_tiles_in_pov_x) :
+		while x < 0 && it_count <= visible_tiles_in_pov_x :
 			x_index = GV.map_width - x % GV.map_width * -1;
 			if x_index == GV.map_width :
 				x_index = 0;
 			if grid[y][x_index].sprite_added_as_children == true :
 				remove_child(grid[y][x_index].sprite);
-			grid[y][x_index].sprite.position.x = x * GV.tile_size;
+			grid[y][x_index].sprite.position.x = x * GV.tile_size - GV.tile_size * 0.5;
 			add_child(grid[y][x_index].sprite);
 			grid[y][x_index].sprite_added_as_children = true;
 			x += 1;
 			it_count += 1;
-		while x >= 0 && it_count <= (visible_tiles_in_pov_x):
+		while x >= 0 && it_count <= visible_tiles_in_pov_x:
 			x_index = x % GV.map_width;
 			if grid[y][x_index].sprite_added_as_children == true :
 				remove_child(grid[y][x_index].sprite);
 				grid[y][x_index].sprite_added_as_children = false;
-			grid[y][x_index].sprite.position.x = x * GV.tile_size;
+			grid[y][x_index].sprite.position.x = x * GV.tile_size - GV.tile_size * 0.5;
 			add_child(grid[y][x_index].sprite);
 			grid[y][x_index].sprite_added_as_children = true;
 			x += 1;
