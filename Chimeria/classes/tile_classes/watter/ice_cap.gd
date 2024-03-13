@@ -1,7 +1,9 @@
 class_name IceCapTile extends Tile
 
 var texture = "res://sqr/ice_cap.png";
-var category = "land";
+var category = "watter";
+var stream_direction : float = 0.0;
+var stream_force : float = 0.0;
 
 func _init(xPos : int, yPos : int, tileId : int, continentId : int): 
 	x = xPos;

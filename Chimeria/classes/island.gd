@@ -6,15 +6,15 @@ var size_class : String;
 var starting_tile : Tile;
 var type : String;
 var tiles_array : Array[Tile];
-var tile_randomizer : TileRandomizer = TileRandomizer.new();
+var tile_maker : TileMaker = TileMaker.new();
 var tile_weights : Dictionary;
 var size_weights : Dictionary = {
-	"very_small" : 30,	
+	"very_small" : 30,
 	"small" : 30,
 	"medium" : 25,
 	"large" : 10,
 	"very_large" : 5,
-	"total" : 100	
+	"total" : 100
 	}
 var age_weights : Dictionary = {
 	"recent" : 25,
@@ -40,18 +40,19 @@ func _init(tile : Tile, island_max_size : int, map : Map) :
 	starting_tile = tile;
 	age_class = random_with_weights(age_weights)
 	
-	if tile.y < map.north_polar_circle || tile.y > map.south_polar_circle:
-		init_arctic_weights();
-	elif tile.y > map.north_tropic && tile.y < map.south_tropic :
+	if map.heat_grid[tile.y][tile.x] > 0.7 && map.humidity_grid[tile.y][tile.x] >= 0.5 :
 		init_tropical_weights()
-	else :
-		var rand = RandomNumberGenerator.new().randi_range(1, 3);
-		if rand == 1 :
-			init_temperate_weights();
-		elif rand == 2 :
-			init_cold_arid_weights();
-		else :
-			init_hot_arid_weights();
+	elif map.heat_grid[tile.y][tile.x] > 0.7 && map.humidity_grid[tile.y][tile.x] < 0.5 :
+		init_hot_arid_weights();
+	elif  map.heat_grid[tile.y][tile.x] < 0.2 :
+		init_arctic_weights();
+	elif map.heat_grid[tile.y][tile.x] < 0.4 && map.humidity_grid[tile.y][tile.x] >= 0.5:
+		init_cold_humid_weights();
+	elif map.heat_grid[tile.y][tile.x] < 0.4 && map.humidity_grid[tile.y][tile.x] < 0.5 :
+		init_cold_arid_weights();
+	else : 
+		init_temperate_weights();
+	
 	tiles_array.append(tile);
 
 func random_with_weights(weights : Dictionary):
@@ -92,7 +93,6 @@ func expand_island(grid : Array, available_tiles : Array[Tile], map : Map) :
 			if direction == "East" :
 				new_tile = origin.getEastTile(grid)
 			
-			## random method
 			if new_tile == null :
 				origin = self.tiles_array[RandomNumberGenerator.new().randi_range(0, self.tiles_array.size() - 1)];
 				break ;
@@ -100,7 +100,7 @@ func expand_island(grid : Array, available_tiles : Array[Tile], map : Map) :
 				break;
 			
 			else :
-				new_tile = tile_randomizer.randomize_tile(new_tile, map, map.heat_grid, map.humidity_grid);
+				new_tile = tile_maker.randomize_tile_with_prestablished_weights(new_tile, tile_weights);
 				map.replace_tile(new_tile.x, new_tile.y, new_tile);
 				self.tiles_array.append(new_tile);
 				placed_tiles += 1;
@@ -167,7 +167,34 @@ func init_hot_arid_weights() :
 func init_cold_arid_weights() :
 	if age_class == "recent" :
 		tile_weights = {
-			GV.steppe : 15,
+			GV.steppe : 35,
+			GV.highland : 25,
+			GV.snowy_mountains : 40,
+			"total" : 100
+		}
+	if age_class == "medium" :
+		tile_weights = {
+			GV.scarces_rocky_islands : 5,
+			GV.shallow_watters : 15,
+			GV.steppe : 40,
+			GV.highland : 20,
+			GV.snowy_mountains : 20,
+			"total" : 100
+		}
+	if age_class == "old" :
+		tile_weights = {
+			GV.scarces_rocky_islands : 10,
+			GV.shallow_watters : 20,
+			GV.steppe : 40,
+			GV.highland : 15,
+			GV.snowy_mountains : 15,
+			"total" : 100,
+		}
+
+func init_cold_humid_weights() :
+	if age_class == "recent" :
+		tile_weights = {
+			GV.toundra : 15,
 			GV.taiga : 20,
 			GV.highland : 25,
 			GV.snowy_mountains : 40,
@@ -177,7 +204,7 @@ func init_cold_arid_weights() :
 		tile_weights = {
 			GV.scarces_rocky_islands : 5,
 			GV.shallow_watters : 15,
-			GV.steppe : 20,
+			GV.toundra : 20,
 			GV.taiga : 20,
 			GV.highland : 20,
 			GV.snowy_mountains : 20,
@@ -187,7 +214,7 @@ func init_cold_arid_weights() :
 		tile_weights = {
 			GV.scarces_rocky_islands : 10,
 			GV.shallow_watters : 20,
-			GV.steppe : 20,
+			GV.toundra : 20,
 			GV.taiga : 20,
 			GV.highland : 15,
 			GV.snowy_mountains : 15,

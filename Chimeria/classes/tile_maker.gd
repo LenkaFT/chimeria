@@ -1,4 +1,4 @@
-class_name TileRandomizer;
+class_name TileMaker;
 
 var temperate_weights = {
 	GV.prairie : 35,
@@ -122,5 +122,9 @@ func randomize_tile(tile : Tile, map : Map, heat_grid, humidity_grid) :
 	else : 
 		weights = temperate_weights;
 	
+	var new_tile_type = random_with_weights(weights);
+	return(create_tile_instance(new_tile_type, tile.x, tile.y, tile.id, tile.continent));
+	
+func randomize_tile_with_prestablished_weights(tile, weights) :
 	var new_tile_type = random_with_weights(weights);
 	return(create_tile_instance(new_tile_type, tile.x, tile.y, tile.id, tile.continent));

@@ -8,7 +8,7 @@ var continent = -1;
 var x = 0;
 var y = 0;
 var sprite = Sprite2D.new();
-var visible : bool = true;
+#var visible : bool = true;
 var type;
 
 func _init(xPos : int, yPos : int, tileId : int, continentId : int): 

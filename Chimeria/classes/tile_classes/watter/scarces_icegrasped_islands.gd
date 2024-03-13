@@ -2,6 +2,8 @@ class_name ScarcesIcegraspedIslandsTile extends Tile
 
 var texture = "res://sqr/scarces_icegrasped_islands.png";
 var category = "watter"
+var stream_direction : float = 0.0;
+var stream_force : float = 0.0;
 
 func _init(xPos : int, yPos : int, tileId : int, continentId : int): 
 	x = xPos;

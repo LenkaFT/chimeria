@@ -2,6 +2,7 @@ extends Node2D
 
 var map : Map;
 var weather_forecast : WeatherForcast;
+var oceanics_streams : OceanicsStreams;
 var camera : Camera2D;
 
 @export var max_zoom = 2;
@@ -10,6 +11,7 @@ var camera : Camera2D;
 
 var humidity_overlay_on : bool = false;
 var heat_overlay_on : bool = false;
+var oceanics_streams_overlay_on : bool = false;
 var directions = {"UP" : false, "DOWN" : false, "LEFT" : false, "RIGHT" : false};
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -22,9 +24,8 @@ func _ready():
 	weather_forecast.create_heat_grid();
 	weather_forecast.create_humidity_grid();
 	map.create_map(weather_forecast.heat_grid, weather_forecast.humidity_grid);
-	var visible_tiles_in_pov_x = camera.get_viewport_rect().size.x / (camera.zoom.x * GV.tile_size)
-	var visible_tiles_in_pov_y = camera.get_viewport_rect().size.y / (camera.zoom.y * GV.tile_size)
-	map.display_map(camera.global_position.x, camera.global_position.y, visible_tiles_in_pov_x, visible_tiles_in_pov_y)
+	oceanics_streams = get_node("Streams");
+	oceanics_streams.make_streams(map);
 
 func move_down(delta) :
 	var camera_treshold = camera.limit_bottom - (camera.get_viewport_rect().size.y / (camera.zoom.y * GV.tile_size) * GV.tile_size);
@@ -94,9 +95,12 @@ func _input(event):
 			heat_overlay_on = true;
 		elif event.keycode == KEY_2 && humidity_overlay_on == false:
 			humidity_overlay_on = true;
+		elif event.keycode == KEY_3 && oceanics_streams_overlay_on == false:
+			oceanics_streams_overlay_on = true;
 		else :
 			heat_overlay_on = false;
 			humidity_overlay_on = false;
+			oceanics_streams_overlay_on = false;
 	
 	if event is InputEventKey and event.is_released() :
 		if event.keycode == KEY_A:
@@ -122,8 +126,14 @@ func _process(delta):
 		weather_forecast.draw_heat_map(camera);
 	elif humidity_overlay_on == true :
 		weather_forecast.draw_humidity_map(camera);
+	elif oceanics_streams_overlay_on == true :
+		oceanics_streams.draw_streams_overlay(camera);
 	else :
 		weather_forecast.remove_overlay();
+
+	var visible_tiles_in_pov_x = ceil(camera.get_viewport_rect().size.x / (camera.zoom.x * GV.tile_size));
+	var visible_tiles_in_pov_y = ceil(camera.get_viewport_rect().size.y / (camera.zoom.y * GV.tile_size));
+	map.display_map(camera.global_position.x, camera.global_position.y, visible_tiles_in_pov_x, visible_tiles_in_pov_y);
 	
 	if directions["UP"] :
 		move_up(delta);
@@ -134,7 +144,4 @@ func _process(delta):
 	if directions["RIGHT"] :
 		move_right(delta);
 		
-	var visible_tiles_in_pov_x = ceil(camera.get_viewport_rect().size.x / (camera.zoom.x * GV.tile_size));
-	var visible_tiles_in_pov_y = ceil(camera.get_viewport_rect().size.y / (camera.zoom.y * GV.tile_size));
-	map.display_map(camera.global_position.x, camera.global_position.y, visible_tiles_in_pov_x, visible_tiles_in_pov_y);
 	

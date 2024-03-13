@@ -4,7 +4,7 @@ extends Node2D
 @export var grid_width = GV.map_width;
 @export var grid_height = GV.map_height;
 var number_of_tiles = grid_width * grid_height;
-@export var earth_to_sea_ratio = 0.5;
+@export var earth_to_sea_ratio = 0.4;
 @export var available_continent_tiles : int = earth_to_sea_ratio * number_of_tiles;
 @export var island_distance_to_land = 4;
 @export var island_ratio = 0.002;
@@ -21,7 +21,7 @@ var grid = [];
 var tile_types = ["prairie", "forest", "mountain", "desert", "sea", "shallow_watters"];
 @export var continents_nb = 3;
 var continents_array : Array[Continent] = [];
-var tile_randomizer = TileRandomizer.new();
+var tile_maker = TileMaker.new();
 var heat_grid;
 var humidity_grid;
 
@@ -46,76 +46,32 @@ func random_with_weights(weights : Dictionary):
 			type = key;
 			return (type)
 
-func create_tile_instance(type : String, x : int, y : int, id : int, continentId : int):
-	if type == GV.prairie :
-		return 	PrairieTile.new(x, y, id, continentId);
-	elif type == GV.marsh :
-		return 	MarshTile.new(x, y, id, continentId);		
-	elif type == GV.forest :
-		return 	ForestTile.new(x, y, id, continentId);
-	elif type == GV.mountain :
-		return 	MountainTile.new(x, y, id, continentId);
-	elif type == GV.desert :
-		return 	DesertTile.new(x, y, id, continentId);
-	elif type == GV.sea :
-		return 	SeaTile.new(x, y, id, continentId);
-	elif type == GV.shallow_watters :
-		return 	Shallow.new(x, y, id, continentId);
-	elif type == GV.highland :
-		return HighlandTile.new(x, y, id, continentId);
-	elif type == GV.snowy_mountains :
-		return SnowyMountainTile.new(x, y, id, continentId);
-	elif type == GV.savannah :
-		return SavannahTile.new(x, y, id, continentId);
-	elif type == GV.dryland :
-		return DrylandTile.new(x, y, id, continentId);
-	elif type == GV.jungle :
-		return JungleTile.new(x, y, id, continentId);
-	elif type == GV.tropical_highlands :
-		return TropicalHighlandTile.new(x, y, id, continentId);
-	elif type == GV.taiga :
-		return TaigaTile.new(x, y, id, continentId);
-	elif type == GV.steppe :
-		return SteppeTile.new(x, y, id, continentId);
-	elif type == GV.toundra :
-		return ToundraTile.new(x, y, id, continentId);
-	elif type == GV.ice_cap :
-		return IceCapTile.new(x, y, id, continentId);
-	elif type == GV.arctic_mainland :
-		return ArticMainlandTile.new(x, y, id, continentId);
-	elif type == GV.scarces_rocky_islands :
-		return ScarcesRockyIslandsTile.new(x, y, id, continentId);
-	elif type == GV.scarces_luxurious_islands :
-		return ScarcesLuxuriousIslandsTile.new(x, y, id, continentId);
-	elif type == GV.scarces_icegrasped_islands :
-		return ScarcesIcegraspedIslandsTile.new(x, y, id, continentId);
-	else :
-		return(null) ;
-#
-func generate_random_tile(x : int, y : int, id : int, continentId : int) :
-		return (create_tile_instance(random_tile_type(), x, y, id, continentId));
-		
-func generate_random_tile_with_weights(x : int, y : int, id : int, continentId : int, weights : Dictionary) :
-		var type  = random_with_weights(weights);
-		return (create_tile_instance(type, x, y, id, continentId));
-
 func replace_tile(x : int, y : int, new_tile : Tile) :
-	#remove_child(grid[y][x].sprite);
-	#add_child(new_tile.sprite);
 	grid[y][x] = new_tile;
+
+func too_close_to_other_continent(x : int, y : int) :
+	if continents_array.size() == 0 :
+		return (false);
+	for n in continents_array.size() :
+		var x1 = continents_array[n].epicenter_coo.x;
+		var y1 = continents_array[n].epicenter_coo.y;
+		if sqrt(pow(x1 - x, 2) + pow(y1 - y, 2)) < (GV.map_width + GV.map_height) / 5 :
+			return true;
+	return (false);
 
 func place_continents():
 	randomize();
 	for n in continents_nb :
 		var rand_x = RandomNumberGenerator.new().randi_range(0, grid_width - 1);
 		var rand_y = RandomNumberGenerator.new().randi_range(0, number_of_tiles - 1) % grid_height;
-
+		while too_close_to_other_continent(rand_x, rand_y) == true :
+			rand_x = RandomNumberGenerator.new().randi_range(0, grid_width - 1);
+			rand_y = RandomNumberGenerator.new().randi_range(0, number_of_tiles - 1) % grid_height;
 		continents_array.append(Continent.new());
 		continents_array[n].id = n;
 		continents_array[n].epicenter_coo = {"x" : rand_x, "y" : rand_y};
 		continents_array[n].calculate_size(available_continent_tiles, continents_nb - n);
 		available_continent_tiles -= continents_array[n].size;
-		#remove_child(grid[rand_y][rand_x].sprite);
 		replace_tile(rand_x, rand_y, 
 		continents_array[n].generate_starting_tile(rand_x, rand_y, grid[rand_y][rand_x].id, continents_array[n].id));
 
@@ -142,7 +98,7 @@ func diffusion_aggregation_map(continent : Continent, heat_grid, humidity_grid) 
 				break ;
 			
 			else :
-				new_tile = tile_randomizer.randomize_tile(new_tile, self, heat_grid, humidity_grid);
+				new_tile = tile_maker.randomize_tile(new_tile, self, heat_grid, humidity_grid);
 				replace_tile(new_tile.x, new_tile.y, new_tile);
 				continent.tiles_array.append(new_tile);
 				placed_tiles += 1;
@@ -158,7 +114,7 @@ func make_coast_shallow() :
 				grid[y][x].getSouthTile(grid) != null && grid[y][x].getSouthTile(grid).category != "watter" ||
 				grid[y][x].getEastTile(grid) != null && grid[y][x].getEastTile(grid).category != "watter" ||
 				grid[y][x].getWestTile(grid) != null && grid[y][x].getWestTile(grid).category != "watter"):
-					replace_tile(x, y, create_tile_instance(GV.shallow_watters, x, y, grid[y][x].id, grid[y][x].continent));
+					replace_tile(x, y, tile_maker.create_tile_instance(GV.shallow_watters, x, y, grid[y][x].id, grid[y][x].continent));
 					
 func make_arctic_seas(heat_grid) :
 	for y in grid.size() :
