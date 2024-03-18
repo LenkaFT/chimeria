@@ -3,9 +3,10 @@ extends Node2D
 
 var humidity_map;
 var heat_map;
-var streams_grid = [];
+var watter_grid = [];
 var requested_streams_overlay : bool;
 var camera : Camera2D;
+var body_of_watter_array;
 
 func _init() :
 	pass ;
@@ -101,79 +102,114 @@ func go_toward_biggest_temperature_differential(tile : Tile, grid) :
 			#return("north_tile");
 
 func determine_stream_force() :
-	for y in streams_grid.size() :
-		for x in streams_grid[y].size() :
-			if streams_grid[y][x] != null :
-				if streams_grid[y][x].getNorthTile(streams_grid) == null:
-					streams_grid[y][x].stream_force -= 0.25;
-				if streams_grid[y][x].getSouthTile(streams_grid) == null :
-					streams_grid[y][x].stream_force -= 0.25;
-				if streams_grid[y][x].getEastTile(streams_grid) == null:
-					streams_grid[y][x].stream_force -= 0.25;
-				if streams_grid[y][x].getWestTile(streams_grid) == null :
-					streams_grid[y][x].stream_force -= 0.25;
+	for y in watter_grid.size() :
+		for x in watter_grid[y].size() :
+			if watter_grid[y][x] != null :
+				if watter_grid[y][x].getNorthTile(watter_grid) == null:
+					watter_grid[y][x].stream_force -= 0.25;
+				if watter_grid[y][x].getSouthTile(watter_grid) == null :
+					watter_grid[y][x].stream_force -= 0.25;
+				if watter_grid[y][x].getEastTile(watter_grid) == null:
+					watter_grid[y][x].stream_force -= 0.25;
+				if watter_grid[y][x].getWestTile(watter_grid) == null :
+					watter_grid[y][x].stream_force -= 0.25;
 					
-	for y in streams_grid.size() :
-		for x in streams_grid[y].size() :
-			if streams_grid[y][x] != null && streams_grid[y][x].stream_force == 1.0:
-				if streams_grid[y][x].getNorthTile(streams_grid).stream_force <= 1.0:
-					streams_grid[y][x].stream_force = (streams_grid[y][x].stream_force + streams_grid[y][x].getNorthTile(streams_grid).stream_force) * 0.5;
-				if streams_grid[y][x].getSouthTile(streams_grid).stream_force <= 1.0:
-					streams_grid[y][x].stream_force = (streams_grid[y][x].stream_force + streams_grid[y][x].getSouthTile(streams_grid).stream_force) * 0.5;
-				if streams_grid[y][x].getEastTile(streams_grid).stream_force <= 1.0:
-					streams_grid[y][x].stream_force =(streams_grid[y][x].stream_force + streams_grid[y][x].getEastTile(streams_grid).stream_force) * 0.5;
-				if streams_grid[y][x].getWestTile(streams_grid).stream_force <= 1.0 :
-					streams_grid[y][x].stream_force = (streams_grid[y][x].stream_force + streams_grid[y][x].getWestTile(streams_grid).stream_force) * 0.5;
+	for y in watter_grid.size() :
+		for x in watter_grid[y].size() :
+			if watter_grid[y][x] != null && watter_grid[y][x].stream_force == 1.0:
+				if watter_grid[y][x].getNorthTile(watter_grid).stream_force <= 1.0:
+					watter_grid[y][x].stream_force = (watter_grid[y][x].stream_force + watter_grid[y][x].getNorthTile(watter_grid).stream_force) * 0.5;
+				if watter_grid[y][x].getSouthTile(watter_grid).stream_force <= 1.0:
+					watter_grid[y][x].stream_force = (watter_grid[y][x].stream_force + watter_grid[y][x].getSouthTile(watter_grid).stream_force) * 0.5;
+				if watter_grid[y][x].getEastTile(watter_grid).stream_force <= 1.0:
+					watter_grid[y][x].stream_force =(watter_grid[y][x].stream_force + watter_grid[y][x].getEastTile(watter_grid).stream_force) * 0.5;
+				if watter_grid[y][x].getWestTile(watter_grid).stream_force <= 1.0 :
+					watter_grid[y][x].stream_force = (watter_grid[y][x].stream_force + watter_grid[y][x].getWestTile(watter_grid).stream_force) * 0.5;
 
 func determine_watter_flow() :
 	var dist_to_equ : float ;
 	var coldest_neighbour : String;
 	var second_hottest_neighbour : String;
 	
-	for y in streams_grid.size() :
-		for x in streams_grid[y].size() :
-			#if streams_grid[y][x] != null && heat_map[y][x] <= 0.25 :
-				#second_hottest_neighbour = get_second_hottest_neighbour(streams_grid[y][x], streams_grid);
+	for y in watter_grid.size() :
+		for x in watter_grid[y].size() :
+			#if watter_grid[y][x] != null && heat_map[y][x] <= 0.25 :
+				#second_hottest_neighbour = get_second_hottest_neighbour(watter_grid[y][x], watter_grid);
 				#if second_hottest_neighbour == "north_tile" :
-					#streams_grid[y][x].stream_direction = PI + heat_map[y][x] * PI;
+					#watter_grid[y][x].stream_direction = PI + heat_map[y][x] * PI;
 				#elif second_hottest_neighbour == "south_tile" :
-					#streams_grid[y][x].stream_direction = heat_map[y][x] * PI;
+					#watter_grid[y][x].stream_direction = heat_map[y][x] * PI;
 				#elif second_hottest_neighbour == "east_tile" :
-					#streams_grid[y][x].stream_direction = (1.5 * PI) + heat_map[y][x] * PI;
-					#if streams_grid[y][x].stream_direction > 2 * PI :
-						#streams_grid[y][x].stream_direction -= 2 * PI;
+					#watter_grid[y][x].stream_direction = (1.5 * PI) + heat_map[y][x] * PI;
+					#if watter_grid[y][x].stream_direction > 2 * PI :
+						#watter_grid[y][x].stream_direction -= 2 * PI;
 				#elif second_hottest_neighbour == "west_tile" :
-					#streams_grid[y][x].stream_direction = (0.5 * PI) + heat_map[y][x] * PI;
-				#if stream_goes_opposite_way(streams_grid[y][x], second_hottest_neighbour) == true:
-					#streams_grid[y][x].stream_direction = abs(2 * PI - streams_grid[y][x].stream_direction)
+					#watter_grid[y][x].stream_direction = (0.5 * PI) + heat_map[y][x] * PI;
+				#if stream_goes_opposite_way(watter_grid[y][x], second_hottest_neighbour) == true:
+					#watter_grid[y][x].stream_direction = abs(2 * PI - watter_grid[y][x].stream_direction)
 					
-			if streams_grid[y][x] != null :
-				coldest_neighbour = go_toward_biggest_temperature_differential(streams_grid[y][x], streams_grid);
+			if watter_grid[y][x] != null :
+				coldest_neighbour = go_toward_biggest_temperature_differential(watter_grid[y][x], watter_grid);
 				if coldest_neighbour == "north_tile" :
-					streams_grid[y][x].stream_direction = PI + heat_map[y][x] * PI;
+					watter_grid[y][x].stream_direction = PI + heat_map[y][x] * PI;
 				elif coldest_neighbour == "south_tile" :
-					streams_grid[y][x].stream_direction = heat_map[y][x] * PI;
+					watter_grid[y][x].stream_direction = heat_map[y][x] * PI;
 				elif coldest_neighbour == "east_tile" :
-					streams_grid[y][x].stream_direction = (1.5 * PI) + heat_map[y][x] * PI;
-					if streams_grid[y][x].stream_direction > 2 * PI :
-						streams_grid[y][x].stream_direction -= 2 * PI;
+					watter_grid[y][x].stream_direction = GV.ONE_AND_HALF_PI + heat_map[y][x] * PI;
+					if watter_grid[y][x].stream_direction > GV.TWO_PI :
+						watter_grid[y][x].stream_direction -= GV.TWO_PI;
 				elif coldest_neighbour == "west_tile" :
-					streams_grid[y][x].stream_direction = (0.5 * PI) + heat_map[y][x] * PI;
+					watter_grid[y][x].stream_direction = GV.HALF_PI + heat_map[y][x] * PI;
 					
-				#if streams_grid[y][x].stream_direction == 0 || streams_grid[y][x].stream_direction == 1 :
+				#if watter_grid[y][x].stream_direction == 0 || watter_grid[y][x].stream_direction == 1 :
 					
+#func make_body_of_watter(starting_x, starting_y, grid) :
+	#var previous_tile_coo : Vector2 = Vector2(0.0, 0.0);
+	#var y = starting_y;
+	#var x = starting_x;
+	#var north_tile : Tile;
+	#var south_tile : Tile;
+	#var east_tile : Tile;
+	#var west_tile : Tile;
+	#
+	#while (1) :
+		#north_tile = grid[y][x].getNorthTile(grid);
+		#if north_tile != null && north_tile.x != previous_tile_coo.x && north_tile.y != previous_tile_coo.y :
+			#x = north_tile.x;
+			#y = north_tile.x;
+			#previous_tile_coo.x = x;
+			#previous_tile_coo.y = y;
+			#
+		#if north_tile != null && north_tile.x != previous_tile_coo.x && north_tile.y != previous_tile_coo.y :
+			#x = north_tile.x;
+			#y = north_tile.x;
+			#previous_tile_coo.x = x;
+			#previous_tile_coo.y = y;
+			#
+			#
+		#if x == starting_x && y == starting_y :
+			#break;
+#
+#func make_body_of_watter_array() :
+	#for y in watter_grid.size() :
+		#for x in watter_grid[y].size() :
+			#if watter_grid[y][x] != null :
+				#body_of_watter_array.append(make_body_of_watter(x, y, watter_grid))
+	
 
 func make_streams(map : Map) :
 	for y in map.grid.size():
-		streams_grid.append([]);
+		watter_grid.append([]);
 		for x in map.grid[y].size() :
 			if map.grid[y][x].category == "watter" :
-				streams_grid[y].append(map.grid[y][x]);
+				watter_grid[y].append(map.grid[y][x]);
 			else :
-				streams_grid[y].append(null);
+				watter_grid[y].append(null);
 	
 	humidity_map = map.humidity_grid;
 	heat_map = map.heat_grid;
+	
+	#make_body_of_watter_array();
 	
 	determine_stream_force();
 	determine_watter_flow();
@@ -212,13 +248,13 @@ func draw_streams() :
 			if x_index == GV.map_width :
 				x_index = 0;
 			## 
-			if streams_grid[y][x_index] != null :
+			if watter_grid[y][x_index] != null :
 				rgb = heat_map[y][x_index];
-				radius_x_force = radius * streams_grid[y][x_index].stream_force;
-				triangle_center = Vector2(streams_grid[y][x_index].sprite.position.x, y * GV.tile_size + GV.tile_size * 0.5)
-				cornerA = triangle_center + Vector2(radius_x_force * cos(streams_grid[y][x_index].stream_direction), radius_x_force * sin(streams_grid[y][x_index].stream_direction));
-				cornerB = triangle_center + Vector2(radius_x_force * cos(streams_grid[y][x_index].stream_direction - 0.75 * PI), radius_x_force * sin(streams_grid[y][x_index].stream_direction - 0.75 * PI));
-				cornerC = triangle_center + Vector2(radius_x_force * cos(streams_grid[y][x_index].stream_direction + 0.75 * PI), radius_x_force * sin(streams_grid[y][x_index].stream_direction +  0.75 * PI));
+				radius_x_force = radius * watter_grid[y][x_index].stream_force;
+				triangle_center = Vector2(watter_grid[y][x_index].sprite.position.x, y * GV.tile_size + GV.tile_size * 0.5)
+				cornerA = triangle_center + Vector2(radius_x_force * cos(watter_grid[y][x_index].stream_direction), radius_x_force * sin(watter_grid[y][x_index].stream_direction));
+				cornerB = triangle_center + Vector2(radius_x_force * cos(watter_grid[y][x_index].stream_direction - 0.75 * PI), radius_x_force * sin(watter_grid[y][x_index].stream_direction - 0.75 * PI));
+				cornerC = triangle_center + Vector2(radius_x_force * cos(watter_grid[y][x_index].stream_direction + 0.75 * PI), radius_x_force * sin(watter_grid[y][x_index].stream_direction +  0.75 * PI));
 				triangle = PackedVector2Array([cornerA, cornerB, cornerC, cornerA]);
 				draw_polyline(triangle, Color(rgb, 0, 1 - rgb, 0.6), 6, true);
 			## 
@@ -227,13 +263,13 @@ func draw_streams() :
 		while x >= 0 && it_count <= visible_tiles_in_pov_x :
 			x_index = x % GV.map_width ;
 			## 
-			if streams_grid[y][x_index] != null :
+			if watter_grid[y][x_index] != null :
 				rgb = heat_map[y][x_index];
-				radius_x_force = radius * streams_grid[y][x_index].stream_force;
-				triangle_center = Vector2(streams_grid[y][x_index].sprite.position.x, y * GV.tile_size + GV.tile_size * 0.5);
-				cornerA = triangle_center + Vector2(radius_x_force * cos(streams_grid[y][x_index].stream_direction), radius_x_force * sin(streams_grid[y][x_index].stream_direction));
-				cornerB = triangle_center + Vector2(radius_x_force * cos(streams_grid[y][x_index].stream_direction - 0.75 * PI), radius_x_force * sin(streams_grid[y][x_index].stream_direction - 0.75 * PI));
-				cornerC = triangle_center + Vector2(radius_x_force * cos(streams_grid[y][x_index].stream_direction + 0.75 * PI), radius_x_force * sin(streams_grid[y][x_index].stream_direction +  0.75 * PI));
+				radius_x_force = radius * watter_grid[y][x_index].stream_force;
+				triangle_center = Vector2(watter_grid[y][x_index].sprite.position.x, y * GV.tile_size + GV.tile_size * 0.5);
+				cornerA = triangle_center + Vector2(radius_x_force * cos(watter_grid[y][x_index].stream_direction), radius_x_force * sin(watter_grid[y][x_index].stream_direction));
+				cornerB = triangle_center + Vector2(radius_x_force * cos(watter_grid[y][x_index].stream_direction - 0.75 * PI), radius_x_force * sin(watter_grid[y][x_index].stream_direction - 0.75 * PI));
+				cornerC = triangle_center + Vector2(radius_x_force * cos(watter_grid[y][x_index].stream_direction + 0.75 * PI), radius_x_force * sin(watter_grid[y][x_index].stream_direction +  0.75 * PI));
 				triangle = PackedVector2Array([cornerA, cornerB, cornerC, cornerA]);
 				draw_polyline(triangle, Color(rgb, 0, 1 - rgb, 0.6), 6, true);
 			## 

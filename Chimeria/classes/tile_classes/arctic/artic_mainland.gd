@@ -1,7 +1,6 @@
 class_name ArticMainlandTile extends Tile
 
 var texture = "res://sqr/artic_mainland_one.png";
-var category = "land";
 
 func _init(xPos : int, yPos : int, tileId : int, continentId : int): 
 	x = xPos;
@@ -13,3 +12,5 @@ func _init(xPos : int, yPos : int, tileId : int, continentId : int):
 	sprite.texture = load(texture);
 	#sprite.scale *= sprite_scale;
 	self.type = GV.arctic_mainland;
+	self.category = "land";
+	self.sub_category = "flatland";

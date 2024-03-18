@@ -36,3 +36,7 @@ var scarces_luxurious_islands = "scarces_luxurious_islands";
 var scarces_icegrasped_islands = "scarces_icegrasped_islands";
 var shallow_watters = "shallow_watters";
 var sea = "sea";
+
+var HALF_PI = PI * 0.5;
+var ONE_AND_HALF_PI = PI * 1.5;
+var TWO_PI = PI * 2;

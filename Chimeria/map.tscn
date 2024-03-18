@@ -4,3 +4,10 @@
 
 [node name="Map" type="Node2D"]
 script = ExtResource("1_c8mbj")
+sea_to_earth_ratio = null
+island_distance_to_land = null
+island_ratio = null
+number_of_island = null
+island_max_size = null
+planetary_rotation_direction = null
+continents_nb = null

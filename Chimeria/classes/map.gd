@@ -4,8 +4,8 @@ extends Node2D
 @export var grid_width = GV.map_width;
 @export var grid_height = GV.map_height;
 var number_of_tiles = grid_width * grid_height;
-@export var earth_to_sea_ratio = 0.4;
-@export var available_continent_tiles : int = earth_to_sea_ratio * number_of_tiles;
+@export var sea_to_earth_ratio = 0.6;
+@export var available_continent_tiles : int = sea_to_earth_ratio * number_of_tiles;
 @export var island_distance_to_land = 4;
 @export var island_ratio = 0.002;
 @export var number_of_island = 40;
@@ -24,6 +24,7 @@ var continents_array : Array[Continent] = [];
 var tile_maker = TileMaker.new();
 var heat_grid;
 var humidity_grid;
+var topographic_grid;
 
 func _init():
 	pass ;
@@ -236,20 +237,29 @@ func display_map(top_left_x : int, top_left_y : int, visible_tiles_in_pov_x : in
 			it_count += 1;
 		y += 1;
 
-func create_map(heat_grid, humidity_grid):
+func create_map(heat_grid, humidity_grid, topographic_grid):
 	self.humidity_grid = humidity_grid;
 	self.heat_grid = heat_grid;
+	self.topographic_grid = topographic_grid;
 	var tile_id = 0;
 	for y in grid_height :
 		grid.append([])
 		for x in grid_width :
-			grid[y].append(SeaTile.new(x, y, tile_id, -1))
+			if topographic_grid[y][x] < sea_to_earth_ratio :
+				grid[y].append(SeaTile.new(x, y, tile_id, -1))
+			elif topographic_grid[y][x] < abs(sea_to_earth_ratio - 1) +  abs(sea_to_earth_ratio - 1) * 0.5:
+				grid[y].append(PrairieTile.new(x, y, tile_id, -1))
+			elif topographic_grid[y][x] < abs(sea_to_earth_ratio - 1) +  abs(sea_to_earth_ratio - 1) * 0.25:
+				grid[y].append(HighlandTile.new(x, y, tile_id, -1))
+			else :
+				grid[y].append(MountainTile.new(x, y, tile_id, -1));
 			#add_child(grid[y][x].sprite);
 			tile_id += 1;
 	
+	
 	place_continents();
-	for n in continents_array.size() :
-		diffusion_aggregation_map(continents_array[n], heat_grid, humidity_grid);
+	#for n in continents_array.size() :
+		#diffusion_aggregation_map(continents_array[n], heat_grid, humidity_grid);
 	place_islands(available_island_spots());
 	make_coast_shallow();
 	make_arctic_seas(heat_grid);

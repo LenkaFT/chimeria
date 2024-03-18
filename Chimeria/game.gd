@@ -11,6 +11,7 @@ var camera : Camera2D;
 
 var humidity_overlay_on : bool = false;
 var heat_overlay_on : bool = false;
+var topographic_overlay_on : bool = false;
 var oceanics_streams_overlay_on : bool = false;
 var directions = {"UP" : false, "DOWN" : false, "LEFT" : false, "RIGHT" : false};
 # Called when the node enters the scene tree for the first time.
@@ -23,7 +24,8 @@ func _ready():
 	weather_forecast = get_node("WeatherForecast");
 	weather_forecast.create_heat_grid();
 	weather_forecast.create_humidity_grid();
-	map.create_map(weather_forecast.heat_grid, weather_forecast.humidity_grid);
+	weather_forecast.create_topographic_grid();
+	map.create_map(weather_forecast.heat_grid, weather_forecast.humidity_grid, weather_forecast.topographic_grid);
 	oceanics_streams = get_node("Streams");
 	oceanics_streams.make_streams(map);
 
@@ -97,6 +99,8 @@ func _input(event):
 			humidity_overlay_on = true;
 		elif event.keycode == KEY_3 && oceanics_streams_overlay_on == false:
 			oceanics_streams_overlay_on = true;
+		elif event.keycode == KEY_4 && topographic_overlay_on == false :
+			topographic_overlay_on = true;
 		else :
 			heat_overlay_on = false;
 			humidity_overlay_on = false;
@@ -128,6 +132,8 @@ func _process(delta):
 		weather_forecast.draw_humidity_map(camera);
 	elif oceanics_streams_overlay_on == true :
 		oceanics_streams.draw_streams_overlay(camera);
+	elif topographic_overlay_on == true :
+		weather_forecast.draw_topographic_map(camera);
 	else :
 		weather_forecast.remove_overlay();
 

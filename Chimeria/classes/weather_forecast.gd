@@ -3,13 +3,16 @@ extends Node2D
 
 var humidity_grid = [];
 var heat_grid = [];
+var topographic_grid = [];
 var width : int = GV.map_width;
 var height : int = GV.map_height;
 var permutation : Array[int];
 var heat_overlay_requested : bool = false;
 var humidity_overlay_requested : bool = false;
+var topographic_overlay_requested : bool = false;
 var perlin_square_frequency = 0.05;
-var camera : Camera2D; 
+var camera : Camera2D;
+var number_of_octaves_for_fbm = 4; 
 
 func _init():
 	pass ;
@@ -23,6 +26,11 @@ func create_humidity_grid() :
 	permutation = [];
 	make_permutation();
 	perlin_noise(humidity_grid, "humidity");
+	
+func create_topographic_grid() :
+	permutation = [];
+	make_permutation();
+	perlin_noise(topographic_grid, "topographic")
 
 func draw_grid(grid, type) :
 	var rect_width = GV.tile_size;
@@ -60,6 +68,8 @@ func draw_grid(grid, type) :
 				draw_rect(rect, Color(rgb, 0, 1 - rgb, 0.6), true);
 			elif type == "humidity" :
 				draw_rect(rect, Color(1 - rgb, 1 - rgb, rgb, 0.6), true);
+			elif type == "topographic" :
+				draw_rect(rect, Color((rgb * 1), 0.2 * rgb, 0, 0.7), true);
 			x += 1;
 			it_count += 1;
 		while x >= 0 && it_count <= visible_tiles_in_pov_x :
@@ -70,6 +80,8 @@ func draw_grid(grid, type) :
 				draw_rect(rect, Color(rgb, 0, 1 - rgb, 0.6), true);
 			elif type == "humidity" :
 				draw_rect(rect, Color(1 - rgb, 1 - rgb, rgb, 0.6), true);
+			elif type == "topographic" :
+				draw_rect(rect, Color((rgb * 1), 0.2 * rgb, 0, 0.7), true);
 			x += 1;
 			it_count += 1;
 		y += 1;
@@ -83,6 +95,10 @@ func _draw():
 	if humidity_overlay_requested == true :
 		draw_grid(humidity_grid, "humidity");
 		humidity_overlay_requested = false;
+		
+	if topographic_overlay_requested == true :
+		draw_grid(topographic_grid, "topographic");
+		topographic_overlay_requested = false;
 
 func draw_heat_map(cam : Camera2D) :
 	camera = cam;
@@ -93,6 +109,11 @@ func draw_humidity_map(cam : Camera2D) :
 	camera = cam;
 	humidity_overlay_requested = true;
 	queue_redraw();
+	
+func draw_topographic_map(cam : Camera2D) :
+	camera = cam;
+	topographic_overlay_requested = true;
+	queue_redraw();
 
 func remove_overlay() :
 	queue_redraw();
@@ -100,7 +121,7 @@ func remove_overlay() :
 func value_normalisation(value : float, min : float, max : float) -> float :
 	return ((value - min) / (max - min));
 
-func humidity_grid_normalisation(grid, min, max) :
+func grid_normalisation(grid, min, max) :
 	for y in height :
 		for x in width :
 			grid[y][x] = value_normalisation(grid[y][x], min, max);
@@ -122,6 +143,18 @@ func heat_map_value_tweak(y, value) :
 	else :
 		return (value * (1.0 - value_normalisation(y, height / 2, height)));
 
+func fractal_brownian_motion(x, y) :
+	var result : float;
+	var amplitude = 1.0;
+	var frequency = perlin_square_frequency;
+	
+	for n in number_of_octaves_for_fbm :
+		var number = amplitude * noise_2d(x * frequency, y * frequency);
+		result += number;
+		amplitude *= 0.5;
+		frequency *= 2;
+	return (result);
+
 func perlin_noise(grid, grid_type : String) :
 	var grid_min = 1;
 	var grid_max = 0;
@@ -132,7 +165,11 @@ func perlin_noise(grid, grid_type : String) :
 	for y in height :
 		grid.append([]);
 		for x in width :
-			var value : float = noise_2d(x * perlin_square_frequency, y * perlin_square_frequency);
+			var value : float;
+			if grid_type != "topographic" :
+				value = noise_2d(x * perlin_square_frequency, y * perlin_square_frequency);
+			else :
+				value = fractal_brownian_motion(x, y);
 			value += 1.0;
 			if grid_type == "heat" :
 				value = heat_map_value_tweak(y, value);
@@ -147,7 +184,7 @@ func perlin_noise(grid, grid_type : String) :
 	if grid_type == "heat" :
 		heat_grid_normalisation(grid, grid_min, grid_max);
 	else :
-		humidity_grid_normalisation(grid, grid_min, grid_max);
+		grid_normalisation(grid, grid_min, grid_max);
 
 func make_permutation() :
 	for n in 256 :

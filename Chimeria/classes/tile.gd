@@ -10,6 +10,8 @@ var y = 0;
 var sprite = Sprite2D.new();
 #var visible : bool = true;
 var type;
+var category;
+var sub_category;
 
 func _init(xPos : int, yPos : int, tileId : int, continentId : int): 
 	x = xPos;
