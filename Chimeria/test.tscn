@@ -9,13 +9,6 @@
 script = ExtResource("1_te4rc")
 
 [node name="Map" parent="." instance=ExtResource("1_1lp4l")]
-sea_to_earth_ratio = null
-island_distance_to_land = null
-island_ratio = null
-number_of_island = null
-island_max_size = null
-planetary_rotation_direction = null
-continents_nb = null
 
 [node name="WeatherForecast" parent="." instance=ExtResource("2_t5erj")]
 

@@ -12,7 +12,7 @@ var humidity_overlay_requested : bool = false;
 var topographic_overlay_requested : bool = false;
 var perlin_square_frequency = 0.05;
 var camera : Camera2D;
-var number_of_octaves_for_fbm = 4; 
+var number_of_octaves_for_fbm = 12; 
 
 func _init():
 	pass ;
@@ -31,6 +31,8 @@ func create_topographic_grid() :
 	permutation = [];
 	make_permutation();
 	perlin_noise(topographic_grid, "topographic")
+	#for y in topographic_grid.size() :
+		#print(topographic_grid[y]);
 
 func draw_grid(grid, type) :
 	var rect_width = GV.tile_size;
@@ -144,15 +146,16 @@ func heat_map_value_tweak(y, value) :
 		return (value * (1.0 - value_normalisation(y, height / 2, height)));
 
 func fractal_brownian_motion(x, y) :
+	randomize();
 	var result : float;
-	var amplitude = 1.0;
+	var amplitude = 1000.0;
 	var frequency = perlin_square_frequency;
 	
 	for n in number_of_octaves_for_fbm :
 		var number = amplitude * noise_2d(x * frequency, y * frequency);
 		result += number;
-		amplitude *= 0.5;
-		frequency *= 2;
+		amplitude *= randf_range(0.3, 0.8);
+		frequency *= 2.5;
 	return (result);
 
 func perlin_noise(grid, grid_type : String) :

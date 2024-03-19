@@ -48,3 +48,26 @@ func getEastTile(grid : Array) -> Tile:
 		#return (null);
 	else :
 		return (grid[y][x + 1]);
+		
+		
+func getBiggestNeigbhourHeightDifference(grid : Array, topographic_map : Array) : 
+	var neighbours_array = [getNorthTile(grid), getSouthTile(grid), getEastTile(grid), getWestTile(grid)];
+	var biggest_height_diff : float = 0.0;
+	
+	for n in neighbours_array.size() :
+		if neighbours_array[n] != null && biggest_height_diff < topographic_map[self.y][self.x] - topographic_map[neighbours_array[n].y][neighbours_array[n].x] :
+			biggest_height_diff =  topographic_map[self.y][self.x] - topographic_map[neighbours_array[n].y][neighbours_array[n].x];
+	
+	return (biggest_height_diff);
+	
+func getAverageAdjacentHeightsDifference(grid : Array, topographic_map : Array) :
+	var neighbours_array = [getNorthTile(grid), getSouthTile(grid), getEastTile(grid), getWestTile(grid)];
+	var adjacent_tile_ct = 0;
+	var total : float = 0.0;
+	
+	for n in neighbours_array.size() :
+		if neighbours_array[n] != null :
+			total +=  (topographic_map[self.y][self.x] - topographic_map[neighbours_array[n].y][neighbours_array[n].y]);
+			adjacent_tile_ct += 1;
+	
+	return (total / adjacent_tile_ct);

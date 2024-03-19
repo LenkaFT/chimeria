@@ -4,7 +4,7 @@ extends Node2D
 @export var grid_width = GV.map_width;
 @export var grid_height = GV.map_height;
 var number_of_tiles = grid_width * grid_height;
-@export var sea_to_earth_ratio = 0.6;
+@export var sea_to_earth_ratio = 0.55;
 @export var available_continent_tiles : int = sea_to_earth_ratio * number_of_tiles;
 @export var island_distance_to_land = 4;
 @export var island_ratio = 0.002;
@@ -236,6 +236,8 @@ func display_map(top_left_x : int, top_left_y : int, visible_tiles_in_pov_x : in
 			x += 1;
 			it_count += 1;
 		y += 1;
+		
+
 
 func create_map(heat_grid, humidity_grid, topographic_grid):
 	self.humidity_grid = humidity_grid;
@@ -245,22 +247,36 @@ func create_map(heat_grid, humidity_grid, topographic_grid):
 	for y in grid_height :
 		grid.append([])
 		for x in grid_width :
-			if topographic_grid[y][x] < sea_to_earth_ratio :
-				grid[y].append(SeaTile.new(x, y, tile_id, -1))
-			elif topographic_grid[y][x] < abs(sea_to_earth_ratio - 1) +  abs(sea_to_earth_ratio - 1) * 0.5:
-				grid[y].append(PrairieTile.new(x, y, tile_id, -1))
-			elif topographic_grid[y][x] < abs(sea_to_earth_ratio - 1) +  abs(sea_to_earth_ratio - 1) * 0.25:
-				grid[y].append(HighlandTile.new(x, y, tile_id, -1))
-			else :
-				grid[y].append(MountainTile.new(x, y, tile_id, -1));
-			#add_child(grid[y][x].sprite);
+			grid[y].append(SeaTile.new(x, y, tile_id, -1))
 			tile_id += 1;
+			
+	for y in grid.size() :
+		for x in grid[y].size() :
+			var eternal_snow_threshold = 0.5 + heat_grid[y][x] * 0.5;
+			if topographic_grid[y][x] < sea_to_earth_ratio :
+				continue ;
+			elif topographic_grid[y][x] > eternal_snow_threshold  && topographic_grid[y][x] > 0.75:
+				replace_tile(x, y, SnowyMountainTile.new(x, y, tile_id, -1));
+				continue;
+				
+			var Biggest_hight_diff = grid[y][x].getBiggestNeigbhourHeightDifference(grid, topographic_grid);
+			if Biggest_hight_diff > 0.20 || topographic_grid[y][x] > 0.75:
+				if heat_grid[y][x] > 0.6 :
+					replace_tile(x, y, MountainTile.new(x, y, tile_id, -1))
+				else : 
+					replace_tile(x, y, SnowyMountainTile.new(x, y, tile_id, -1));
+			elif Biggest_hight_diff > 0.10 || topographic_grid[y][x] > 0.70:
+				replace_tile(x, y, tile_maker.generate_highland_tile(self));
+				#replace_tile(x, y, HighlandTile.new(x, y, tile_id, -1))
+			else :
+				replace_tile(x, y, tile_maker.generate_lowland_tile(self));
+				#replace_tile(x, y,PrairieTile.new(x, y, tile_id, -1))
 	
 	
-	place_continents();
+	#place_continents();
 	#for n in continents_array.size() :
 		#diffusion_aggregation_map(continents_array[n], heat_grid, humidity_grid);
-	place_islands(available_island_spots());
+	#place_islands(available_island_spots());
 	make_coast_shallow();
 	make_arctic_seas(heat_grid);
 
