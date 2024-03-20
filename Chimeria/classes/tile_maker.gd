@@ -8,12 +8,34 @@ var temperate_weights = {
 	GV.marsh : 10,
 	"total" : 100
 };
+var temperate_flatland_weights = {
+	GV.prairie : 50,
+	GV.forest : 50,
+	"total" : 100
+};
+var temperate_highland_weights = {
+	GV.highland : 30,
+	GV.wooded_highland : 70,
+	"total" : 100
+};
 var hot_arid_weights = {
 	GV.savannah : 35,
 	GV.alluviale_plain : 0,
 	GV.dryland : 30,
 	GV.desert : 25,
 	GV.mountain : 10,
+	"total" : 100
+};
+
+var hot_arid_highland_weights = {
+	GV.dryland : 100,
+	"total" : 100
+};
+
+var hot_arid_flatland_weights = {
+	GV.savannah : 50,
+	GV.alluviale_plain : 0,
+	GV.desert : 25,
 	"total" : 100
 };
 
@@ -47,6 +69,32 @@ var arctic_weights = {
 	
 	"total" : 100
 };
+
+#func get_adjacents_tiles_types(tile : Tile, map : Map) :
+	#var neighbours_array : Array[Tile] = [tile.getNorthTile(map.grid), tile.getSouthTile(map.grid), tile.getEastTile(map.grid), tile.getWestTile(map.grid)]	
+	#var adjacent_types_dic = {
+		#"highland" : 0,
+		#"mountain" : 0,
+		#"flatland" : 0,
+		#"forest" : 0,
+		#"watter" : 0
+	#}
+	#
+	#for n in neighbours_array.size() :
+		#if neighbours_array[n] == null :
+			#continue;
+		#elif neighbours_array[n].sub_category == "highland" :
+			#adjacent_types_dic["highland"] += 1;
+		#elif neighbours_array[n].sub_category == "mountain" :
+			#adjacent_types_dic["mountain"] += 1;
+		#elif neighbours_array[n].sub_category == "flatland" :
+			#adjacent_types_dic["flatland"] += 1;
+		#elif neighbours_array[n].sub_category == "forest" :
+			#adjacent_types_dic["forest"] += 1;
+		#elif neighbours_array[n].category == "watter" :
+			#adjacent_types_dic["watter"] += 1;
+		#
+	#return adjacent_types_dic;
 
 func generate_temperate_weights(tile : Tile, map : Map) :
 	var neighbours_array : Array[Tile] = [tile.getNorthTile(map.grid), tile.getSouthTile(map.grid), tile.getEastTile(map.grid), tile.getWestTile(map.grid)]
@@ -130,49 +178,53 @@ func generate_equatorial_weights(tile : Tile, map : Map) :
 		
 	weights["total"] = weights[GV.prairie] + weights[GV.forest] + weights[GV.marsh] + weights[GV.highland] + weights[GV.mountain];
 
-func create_tile_instance(type : String, x : int, y : int, id : int, continentId : int):
+func create_tile_instance(type : String, x : int, y : int, id : int):
 	if type == GV.prairie :
-		return 	PrairieTile.new(x, y, id, continentId);
+		return 	PrairieTile.new(x, y, id);
 	elif type == GV.marsh :
-		return 	MarshTile.new(x, y, id, continentId);		
+		return 	MarshTile.new(x, y, id);		
 	elif type == GV.forest :
-		return 	ForestTile.new(x, y, id, continentId);
+		return 	ForestTile.new(x, y, id);
 	elif type == GV.mountain :
-		return 	MountainTile.new(x, y, id, continentId);
+		return 	MountainTile.new(x, y, id, false);
+	elif type == GV.wooded_mountain :
+		return 	MountainTile.new(x, y, id, true);
 	elif type == GV.desert :
-		return 	DesertTile.new(x, y, id, continentId);
+		return 	DesertTile.new(x, y, id);
 	elif type == GV.sea :
-		return 	SeaTile.new(x, y, id, continentId);
+		return 	SeaTile.new(x, y, id);
 	elif type == GV.shallow_watters :
-		return 	Shallow.new(x, y, id, continentId);
+		return 	Shallow.new(x, y, id);
 	elif type == GV.highland :
-		return HighlandTile.new(x, y, id, continentId);
+		return HighlandTile.new(x, y, id, false);
+	elif type == GV.wooded_highland :
+		return HighlandTile.new(x, y, id, true);
 	elif type == GV.snowy_mountains :
-		return SnowyMountainTile.new(x, y, id, continentId);
+		return SnowyMountainTile.new(x, y, id);
 	elif type == GV.savannah :
-		return SavannahTile.new(x, y, id, continentId);
+		return SavannahTile.new(x, y, id);
 	elif type == GV.dryland :
-		return DrylandTile.new(x, y, id, continentId);
+		return DrylandTile.new(x, y, id);
 	elif type == GV.jungle :
-		return JungleTile.new(x, y, id, continentId);
+		return JungleTile.new(x, y, id);
 	elif type == GV.tropical_highlands :
-		return TropicalHighlandTile.new(x, y, id, continentId);
+		return TropicalHighlandTile.new(x, y, id);
 	elif type == GV.taiga :
-		return TaigaTile.new(x, y, id, continentId);
+		return TaigaTile.new(x, y, id);
 	elif type == GV.steppe :
-		return SteppeTile.new(x, y, id, continentId);
+		return SteppeTile.new(x, y, id);
 	elif type == GV.toundra :
-		return ToundraTile.new(x, y, id, continentId);
+		return ToundraTile.new(x, y, id);
 	elif type == GV.ice_cap :
-		return IceCapTile.new(x, y, id, continentId);
+		return IceCapTile.new(x, y, id);
 	elif type == GV.arctic_mainland :
-		return ArticMainlandTile.new(x, y, id, continentId);
+		return ArticMainlandTile.new(x, y, id);
 	elif type == GV.scarces_rocky_islands :
-		return ScarcesRockyIslandsTile.new(x, y, id, continentId);
+		return ScarcesRockyIslandsTile.new(x, y, id);
 	elif type == GV.scarces_luxurious_islands :
-		return ScarcesLuxuriousIslandsTile.new(x, y, id, continentId);
+		return ScarcesLuxuriousIslandsTile.new(x, y, id);
 	elif type == GV.scarces_icegrasped_islands :
-		return ScarcesIcegraspedIslandsTile.new(x, y, id, continentId);
+		return ScarcesIcegraspedIslandsTile.new(x, y, id);
 	else :
 		return(null) ;
 		
@@ -189,24 +241,127 @@ func random_with_weights(weights : Dictionary):
 			type = key;
 			return (type)
 
-func randomize_tile(tile : Tile, map : Map, heat_grid, humidity_grid) :
-	var weights;
-	if heat_grid[tile.y][tile.x] > 0.7 && humidity_grid[tile.y][tile.x] >= 0.5 :
-		weights = equatorial_weights;
-	elif heat_grid[tile.y][tile.x] > 0.7 && humidity_grid[tile.y][tile.x] < 0.5 :
-		weights = hot_arid_weights ;
-	elif  heat_grid[tile.y][tile.x] < 0.2 :
-		weights = arctic_weights;
-	elif heat_grid[tile.y][tile.x] < 0.4 && humidity_grid[tile.y][tile.x] >= 0.5:
-		weights = cold_humid_weights;
-	elif heat_grid[tile.y][tile.x] < 0.4 && humidity_grid[tile.y][tile.x] < 0.5 :
-		weights = cold_arid_weights;
-	else : 
-		weights = generate_temperate_weights(tile, map);
-	
-	var new_tile_type = random_with_weights(weights);
-	return(create_tile_instance(new_tile_type, tile.x, tile.y, tile.id, tile.continent));
+#func randomize_tile(tile : Tile, map : Map, heat_grid, humidity_grid) :
+	#var weights;
+	#if heat_grid[tile.y][tile.x] > 0.7 && humidity_grid[tile.y][tile.x] >= 0.5 :
+		#weights = equatorial_weights;
+	#elif heat_grid[tile.y][tile.x] > 0.7 && humidity_grid[tile.y][tile.x] < 0.5 :
+		#weights = hot_arid_weights ;
+	#elif  heat_grid[tile.y][tile.x] < 0.2 :
+		#weights = arctic_weights;
+	#elif heat_grid[tile.y][tile.x] < 0.4 && humidity_grid[tile.y][tile.x] >= 0.5:
+		#weights = cold_humid_weights;
+	#elif heat_grid[tile.y][tile.x] < 0.4 && humidity_grid[tile.y][tile.x] < 0.5 :
+		#weights = cold_arid_weights;
+	#else : 
+		#weights = generate_temperate_weights(tile, map);
+	#
+	#var new_tile_type = random_with_weights(weights);
+	#return(create_tile_instance(new_tile_type, tile.x, tile.y, tile.id));
 	
 func randomize_tile_with_prestablished_weights(tile, weights) :
 	var new_tile_type = random_with_weights(weights);
-	return(create_tile_instance(new_tile_type, tile.x, tile.y, tile.id, tile.continent));
+	return(create_tile_instance(new_tile_type, tile.x, tile.y, tile.id));
+
+func is_hot_humid(x, y, map : Map) :
+	if map.heat_grid[y][x] > 0.7 && map.humidity_grid[y][x] >= 0.7 :
+		return (true);
+	return (false);
+	
+func is_hot_arid(x, y, map : Map) :
+	if map.heat_grid[y][x] > 0.7 && map.humidity_grid[y][x] < 0.4 :
+		return (true);
+	return (false);
+
+func is_polar(x, y, map : Map) :
+	if map.heat_grid[y][x] < 0.2 :
+		return (true);
+	return (false);
+	
+func is_cold_humid(x, y, map : Map) :
+	if map.heat_grid[y][x] < 0.4 && map.humidity_grid[y][x] >= 0.5 :
+		return (true);
+	return (false);
+	
+func is_cold_arid(x, y, map : Map) :
+	if map.heat_grid[y][x] < 0.4 && map.humidity_grid[y][x] < 0.5 :
+		return (true);
+
+func temperate_highland(tile : Tile, map : Map) :
+	var adjacent_tiles_dic = tile.get_adjacents_tiles_types(map.grid);
+	var weights = temperate_highland_weights.duplicate(true);
+	
+	weights[GV.wooded_highland] += adjacent_tiles_dic["forest"] * 10 - adjacent_tiles_dic["flatland"] * 10;
+	weights[GV.highland] += adjacent_tiles_dic["flatland"] * 10 - adjacent_tiles_dic["forest"] * 10;
+	weights["total"] = weights[GV.wooded_highland] + weights[GV.highland];
+	
+	var new_tile : Tile = randomize_tile_with_prestablished_weights(tile, weights);
+	print(new_tile.type)
+	return (new_tile);
+
+func tropical_lowland(tile : Tile, map : Map) :
+	if tile.getAverageAdjacentHeightsDifference(map.grid, map.topographic_grid) <= 0.05 :
+		return (MarshTile.new(tile.x, tile.y, tile.id));
+	return (JungleTile.new(tile.x, tile.y, tile.id));
+	
+func hot_arid_lowland(tile : Tile, map : Map) :
+	if map.heat_grid[tile.y][tile.x] >= 0.9 :
+		return (DesertTile.new(tile.x, tile.y, tile.id));
+	return (SavannahTile.new(tile.x, tile.y, tile.id));
+	
+func polar(tile : Tile, map : Map) :
+	if map.heat_grid[tile.y][tile.x] >= 0.15 :
+		return (ToundraTile.new(tile.x, tile.y, tile.id));
+	return (ArticMainlandTile.new(tile.x, tile.y, tile.id));
+
+func cold_humid_lowland(tile : Tile, map : Map) :
+	if tile.getAverageAdjacentHeightsDifference(map.grid, map.topographic_grid) <= 0.05 :
+		return (MarshTile.new(tile.x, tile.y, tile.id));
+	else :
+		return(TaigaTile.new(tile.x, tile.y, tile.id));
+		
+func temperate_lowland(tile : Tile, map : Map) :
+	if tile.getAverageAdjacentHeightsDifference(map.grid, map.topographic_grid) <= 0.01 :
+		if  map.humidity_grid[tile.y][tile.x] > 0.55 :
+			return (MarshTile.new(tile.x, tile.y, tile.id));
+		return (PrairieTile.new(tile.x, tile.y, tile.id));
+	else :
+		var adjacent_tiles_dic = tile.get_adjacents_tiles_types(map.grid);
+		var weights = temperate_flatland_weights.duplicate(true);
+		
+		weights[GV.prairie] += adjacent_tiles_dic["forest"] * 12.5 - adjacent_tiles_dic["flatland"] * 12.5;
+		weights[GV.forest] += adjacent_tiles_dic["flatland"] * 12.5 - adjacent_tiles_dic["forest"] * 12.5;
+		weights["total"] = weights[GV.forest] + weights[GV.prairie];
+		
+		return (randomize_tile_with_prestablished_weights(tile, weights));
+	
+
+func generate_highland_tile(tile : Tile, map : Map) :
+	if is_hot_humid(tile.x, tile.y, map) :
+		return (TropicalHighlandTile.new(tile.x, tile.y, tile.id));
+	elif is_hot_arid(tile.x, tile.y, map) :
+		return (DrylandTile.new(tile.x, tile.y, tile.id))
+	elif is_polar(tile.x, tile.y, map) :
+		return(ArticMainlandTile.new(tile.x, tile.y, tile.id))
+	elif is_cold_humid(tile.x, tile.y, map) :
+		return (HighlandTile.new(tile.x, tile.y, tile.id, false));
+	elif is_cold_arid(tile.x, tile.y, map) :
+		return (DrylandTile.new(tile.x, tile.y, tile.id));
+	else : 
+		return (temperate_highland(tile, map));
+		#return (DesertTile.new(tile.x, tile.y, tile.id))
+		
+func generate_lowland_tile(tile : Tile, map : Map) :
+	if is_hot_humid(tile.x, tile.y, map) :
+		return (tropical_lowland(tile, map));
+	elif is_hot_arid(tile.x, tile.y, map) :
+		return (hot_arid_lowland(tile, map));
+	elif is_polar(tile.x, tile.y, map) :
+		return(polar(tile, map))
+	elif is_cold_humid(tile.x, tile.y, map) :
+		return (cold_humid_lowland(tile, map));
+	elif is_cold_arid(tile.x, tile.y, map) :
+		return (SteppeTile.new(tile.x, tile.y, tile.id));
+	else : 
+		return (temperate_lowland(tile, map));
+		

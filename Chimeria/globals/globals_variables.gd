@@ -13,7 +13,9 @@ var marsh = "marsh";
 var forest = "forest";
 
 var highland = "highland";
+var wooded_highland = "wooded_highland";
 var mountain = "mountain";
+var wooded_mountain = "wooded_mountain";
 var snowy_mountains = "snowy_mountains";
 
 var desert = "desert";

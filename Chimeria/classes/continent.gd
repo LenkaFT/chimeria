@@ -47,21 +47,21 @@ func calculate_size(availables_tiles : int, remaining_continents_to_create : int
 	var size_modifier = (availables_tiles / remaining_continents_to_create) * size_factor;
 	size = (availables_tiles / remaining_continents_to_create) + size_modifier;
 	
-func generate_starting_tile(x : int, y : int, tileId : int, continentId : int) :
+func generate_starting_tile(x : int, y : int, tileId : int) :
 	randomize();
 	var new_tile_type = tile_types[RandomNumberGenerator.new().randi() % tile_types.size()];
 	var starting_tile = null;
 	if new_tile_type == "prairie" :
-		starting_tile = PrairieTile.new(x, y, tileId, continentId);
+		starting_tile = PrairieTile.new(x, y, tileId);
 	
 	if new_tile_type == "forest" :
-		starting_tile = ForestTile.new(x, y, tileId, continentId);
+		starting_tile = ForestTile.new(x, y, tileId);
 	
 	if new_tile_type == "mountain" :
-		starting_tile = MountainTile.new(x, y, tileId, continentId);
+		starting_tile = MountainTile.new(x, y, tileId, false);
 	
 	if new_tile_type == "desert" :
-		starting_tile = DesertTile.new(x, y, tileId, continentId);
+		starting_tile = DesertTile.new(x, y, tileId);
 	
 	tiles_array.append(starting_tile);
 	return (starting_tile);

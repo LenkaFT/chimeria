@@ -13,11 +13,11 @@ var type;
 var category;
 var sub_category;
 
-func _init(xPos : int, yPos : int, tileId : int, continentId : int): 
+func _init(xPos : int, yPos : int, tileId : int): 
 	x = xPos;
 	y = yPos;
 	id = tileId;
-	continent = continentId;
+	
 
 func getNorthTile(grid : Array) -> Tile:
 	if y == 0 :
@@ -49,7 +49,33 @@ func getEastTile(grid : Array) -> Tile:
 	else :
 		return (grid[y][x + 1]);
 		
+
+func get_adjacents_tiles_types(grid) :
+	var neighbours_array : Array[Tile] = [self.getNorthTile(grid), self.getSouthTile(grid), self.getEastTile(grid), self.getWestTile(grid)]
+	var adjacent_types_dic = {
+		"highland" : 0,
+		"mountain" : 0,
+		"flatland" : 0,
+		"forest" : 0,
+		"watter" : 0
+	}
+	
+	for n in neighbours_array.size() :
+		if neighbours_array[n] == null :
+			continue;
+		elif neighbours_array[n].sub_category == "highland" :
+			adjacent_types_dic["highland"] += 1;
+		elif neighbours_array[n].sub_category == "mountain" :
+			adjacent_types_dic["mountain"] += 1;
+		elif neighbours_array[n].sub_category == "flatland" :
+			adjacent_types_dic["flatland"] += 1;
+		elif neighbours_array[n].sub_category == "forest" :
+			adjacent_types_dic["forest"] += 1;
+		elif neighbours_array[n].category == "watter" :
+			adjacent_types_dic["watter"] += 1;
 		
+	return adjacent_types_dic;
+
 func getBiggestNeigbhourHeightDifference(grid : Array, topographic_map : Array) : 
 	var neighbours_array = [getNorthTile(grid), getSouthTile(grid), getEastTile(grid), getWestTile(grid)];
 	var biggest_height_diff : float = 0.0;

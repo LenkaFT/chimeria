@@ -60,21 +60,21 @@ func too_close_to_other_continent(x : int, y : int) :
 			return true;
 	return (false);
 
-func place_continents():
-	randomize();
-	for n in continents_nb :
-		var rand_x = RandomNumberGenerator.new().randi_range(0, grid_width - 1);
-		var rand_y = RandomNumberGenerator.new().randi_range(0, number_of_tiles - 1) % grid_height;
-		while too_close_to_other_continent(rand_x, rand_y) == true :
-			rand_x = RandomNumberGenerator.new().randi_range(0, grid_width - 1);
-			rand_y = RandomNumberGenerator.new().randi_range(0, number_of_tiles - 1) % grid_height;
-		continents_array.append(Continent.new());
-		continents_array[n].id = n;
-		continents_array[n].epicenter_coo = {"x" : rand_x, "y" : rand_y};
-		continents_array[n].calculate_size(available_continent_tiles, continents_nb - n);
-		available_continent_tiles -= continents_array[n].size;
-		replace_tile(rand_x, rand_y, 
-		continents_array[n].generate_starting_tile(rand_x, rand_y, grid[rand_y][rand_x].id, continents_array[n].id));
+#func place_continents():
+	#randomize();
+	#for n in continents_nb :
+		#var rand_x = RandomNumberGenerator.new().randi_range(0, grid_width - 1);
+		#var rand_y = RandomNumberGenerator.new().randi_range(0, number_of_tiles - 1) % grid_height;
+		#while too_close_to_other_continent(rand_x, rand_y) == true :
+			#rand_x = RandomNumberGenerator.new().randi_range(0, grid_width - 1);
+			#rand_y = RandomNumberGenerator.new().randi_range(0, number_of_tiles - 1) % grid_height;
+		#continents_array.append(Continent.new());
+		#continents_array[n].id = n;
+		#continents_array[n].epicenter_coo = {"x" : rand_x, "y" : rand_y};
+		#continents_array[n].calculate_size(available_continent_tiles, continents_nb - n);
+		#available_continent_tiles -= continents_array[n].size;
+		#replace_tile(rand_x, rand_y, 
+		#continents_array[n].generate_starting_tile(rand_x, rand_y, grid[rand_y][rand_x].id, continents_array[n].id));
 
 func diffusion_aggregation_map(continent : Continent, heat_grid, humidity_grid) :
 	var placed_tiles = 0;
@@ -115,7 +115,7 @@ func make_coast_shallow() :
 				grid[y][x].getSouthTile(grid) != null && grid[y][x].getSouthTile(grid).category != "watter" ||
 				grid[y][x].getEastTile(grid) != null && grid[y][x].getEastTile(grid).category != "watter" ||
 				grid[y][x].getWestTile(grid) != null && grid[y][x].getWestTile(grid).category != "watter"):
-					replace_tile(x, y, tile_maker.create_tile_instance(GV.shallow_watters, x, y, grid[y][x].id, grid[y][x].continent));
+					replace_tile(x, y, tile_maker.create_tile_instance(GV.shallow_watters, x, y, grid[y][x].id));
 					
 func make_arctic_seas(heat_grid) :
 	for y in grid.size() :
@@ -129,9 +129,9 @@ func make_arctic_seas(heat_grid) :
 				heat_grid[y][x] <= 0.05) :
 					var new_tile;
 					if rand % 32 == 0 :
-						new_tile = ScarcesIcegraspedIslandsTile.new(grid[y][x].x, grid[y][x].y, grid[y][x].id, grid[y][x].continent);
+						new_tile = ScarcesIcegraspedIslandsTile.new(grid[y][x].x, grid[y][x].y, grid[y][x].id);
 					else :
-						new_tile = IceCapTile.new(grid[y][x].x, grid[y][x].y, grid[y][x].id, grid[y][x].continent);
+						new_tile = IceCapTile.new(grid[y][x].x, grid[y][x].y, grid[y][x].id);
 					replace_tile(grid[y][x].x, grid[y][x].y, new_tile);
 
 func neighbours_are_land_tile(start_x : int, start_y : int, x : int, y : int, recursion_ct : int) :
@@ -247,7 +247,7 @@ func create_map(heat_grid, humidity_grid, topographic_grid):
 	for y in grid_height :
 		grid.append([])
 		for x in grid_width :
-			grid[y].append(SeaTile.new(x, y, tile_id, -1))
+			grid[y].append(SeaTile.new(x, y, tile_id))
 			tile_id += 1;
 			
 	for y in grid.size() :
@@ -256,20 +256,20 @@ func create_map(heat_grid, humidity_grid, topographic_grid):
 			if topographic_grid[y][x] < sea_to_earth_ratio :
 				continue ;
 			elif topographic_grid[y][x] > eternal_snow_threshold  && topographic_grid[y][x] > 0.75:
-				replace_tile(x, y, SnowyMountainTile.new(x, y, tile_id, -1));
+				replace_tile(x, y, SnowyMountainTile.new(x, y, tile_id));
 				continue;
 				
 			var Biggest_hight_diff = grid[y][x].getBiggestNeigbhourHeightDifference(grid, topographic_grid);
 			if Biggest_hight_diff > 0.20 || topographic_grid[y][x] > 0.75:
 				if heat_grid[y][x] > 0.6 :
-					replace_tile(x, y, MountainTile.new(x, y, tile_id, -1))
+					replace_tile(x, y, MountainTile.new(x, y, tile_id, true))
 				else : 
-					replace_tile(x, y, SnowyMountainTile.new(x, y, tile_id, -1));
+					replace_tile(x, y, SnowyMountainTile.new(x, y, tile_id));
 			elif Biggest_hight_diff > 0.10 || topographic_grid[y][x] > 0.70:
-				replace_tile(x, y, tile_maker.generate_highland_tile(self));
+				replace_tile(x, y, tile_maker.generate_highland_tile(grid[y][x], self));
 				#replace_tile(x, y, HighlandTile.new(x, y, tile_id, -1))
 			else :
-				replace_tile(x, y, tile_maker.generate_lowland_tile(self));
+				replace_tile(x, y, tile_maker.generate_lowland_tile(grid[y][x], self));
 				#replace_tile(x, y,PrairieTile.new(x, y, tile_id, -1))
 	
 	
