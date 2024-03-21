@@ -28,6 +28,17 @@ func _ready():
 	map.create_map(weather_forecast.heat_grid, weather_forecast.humidity_grid, weather_forecast.topographic_grid);
 	oceanics_streams = get_node("Streams");
 	oceanics_streams.make_streams(map);
+	
+	#var species : Species = Species.new();
+	#species.calcultate_individus_per_chunk();
+	var animal_biomass : float = 0.0;
+	var vegetal_biomass : float = 0.0;
+	for y in map.grid.size() :
+		for x in map.grid[y].size() :
+			animal_biomass += map.grid[y][x].animal_biomass;
+			vegetal_biomass += map.grid[y][x].vegetal_biomass;
+	print("vegetals : ", vegetal_biomass / 1000000000, " GT")
+	print("animals : ", animal_biomass / 1000000000, " GT")
 
 func move_down(delta) :
 	var camera_treshold = camera.limit_bottom - (camera.get_viewport_rect().size.y / (camera.zoom.y * GV.tile_size) * GV.tile_size);
@@ -35,7 +46,7 @@ func move_down(delta) :
 		camera.global_position += Vector2.DOWN * (GV.tile_size);
 	elif camera.global_position.y + GV.tile_size - camera_treshold < GV.tile_size :
 		camera.global_position += Vector2.DOWN * (camera.global_position.y + GV.tile_size - camera_treshold);
-		
+	
 func move_up(delta) :
 	if camera.global_position.y - GV.tile_size >= camera.limit_top:
 		camera.global_position += Vector2.UP * (GV.tile_size);

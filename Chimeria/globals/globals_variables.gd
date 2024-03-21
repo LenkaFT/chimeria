@@ -39,6 +39,25 @@ var scarces_icegrasped_islands = "scarces_icegrasped_islands";
 var shallow_watters = "shallow_watters";
 var sea = "sea";
 
+var minuscule = "minuscule";
+var small = "small";
+var medium = "medium";
+var larg = "larg";
+var huge = "huge";
+var cyclopean = "cyclopean";
+
+var light = "light";
+var very_light = "very_light";
+var big = "big";
+var heavy = "heavy";
+var super_heavy = "super_heavy";
+var enourmous = "enormous";
+var gargantuous = "gargantuous";
+
 var HALF_PI = PI * 0.5;
 var ONE_AND_HALF_PI = PI * 1.5;
 var TWO_PI = PI * 2;
+
+var carbon_levels = 1;
+var vegetal_to_animal_biomass_ratio = 0.005;
+var vegetal_to_animal_biomass_in_ocean_ratio = 3;

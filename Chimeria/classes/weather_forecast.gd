@@ -32,7 +32,6 @@ func create_topographic_grid() :
 	make_permutation();
 	perlin_noise(topographic_grid, "topographic")
 	#for y in topographic_grid.size() :
-		#print(topographic_grid[y]);
 
 func draw_grid(grid, type) :
 	var rect_width = GV.tile_size;
@@ -47,7 +46,6 @@ func draw_grid(grid, type) :
 	var rgb;
 	var rect;
 	
-	#print("camera pos : ", camera.global_position)
 	
 	if camera :
 		visible_tiles_in_pov_x = ceil(camera.get_viewport_rect().size.x / (camera.zoom.x * GV.tile_size));

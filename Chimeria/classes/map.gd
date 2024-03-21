@@ -11,70 +11,23 @@ var number_of_tiles = grid_width * grid_height;
 @export var number_of_island = 40;
 @export var island_max_size = 15;
 @export var planetary_rotation_direction = "right";
-var equator = grid_height / 2;
-var north_tropic = grid_height / 2 - grid_height / 8;
-var south_tropic = grid_height / 2 + grid_height / 8;
-var north_polar_circle = grid_height / 16;
-var south_polar_circle = grid_height - grid_height / 16;
 var tile_size = 64;
 var grid = [];
-var tile_types = ["prairie", "forest", "mountain", "desert", "sea", "shallow_watters"];
-@export var continents_nb = 3;
-var continents_array : Array[Continent] = [];
+#var continents_array : Array[Continent] = [];
 var tile_maker = TileMaker.new();
 var heat_grid;
 var humidity_grid;
 var topographic_grid;
+#range from 1 to 2, determine luxirousness of the world, 0 : actual earth, 2 : carbonifere earth;
+var carbon_lvls = 1;
 
 func _init():
 	pass ;
-
-func random_tile_type():
-	randomize();
-	var rand = RandomNumberGenerator.new().randi() % tile_types.size();
-	return tile_types[rand];
 	
-func random_with_weights(weights : Dictionary):
-	randomize();
-	var rand = RandomNumberGenerator.new().randi_range(1, weights["total"]);
-	var cursor = 0;
-	var type : String;
-	for key in weights :
-		if key == "total" :
-			break;
-		cursor += weights[key];
-		if cursor >= rand :
-			type = key;
-			return (type)
 
 func replace_tile(x : int, y : int, new_tile : Tile) :
 	grid[y][x] = new_tile;
 
-func too_close_to_other_continent(x : int, y : int) :
-	if continents_array.size() == 0 :
-		return (false);
-	for n in continents_array.size() :
-		var x1 = continents_array[n].epicenter_coo.x;
-		var y1 = continents_array[n].epicenter_coo.y;
-		if sqrt(pow(x1 - x, 2) + pow(y1 - y, 2)) < (GV.map_width + GV.map_height) / 5 :
-			return true;
-	return (false);
-
-#func place_continents():
-	#randomize();
-	#for n in continents_nb :
-		#var rand_x = RandomNumberGenerator.new().randi_range(0, grid_width - 1);
-		#var rand_y = RandomNumberGenerator.new().randi_range(0, number_of_tiles - 1) % grid_height;
-		#while too_close_to_other_continent(rand_x, rand_y) == true :
-			#rand_x = RandomNumberGenerator.new().randi_range(0, grid_width - 1);
-			#rand_y = RandomNumberGenerator.new().randi_range(0, number_of_tiles - 1) % grid_height;
-		#continents_array.append(Continent.new());
-		#continents_array[n].id = n;
-		#continents_array[n].epicenter_coo = {"x" : rand_x, "y" : rand_y};
-		#continents_array[n].calculate_size(available_continent_tiles, continents_nb - n);
-		#available_continent_tiles -= continents_array[n].size;
-		#replace_tile(rand_x, rand_y, 
-		#continents_array[n].generate_starting_tile(rand_x, rand_y, grid[rand_y][rand_x].id, continents_array[n].id));
 
 func diffusion_aggregation_map(continent : Continent, heat_grid, humidity_grid) :
 	var placed_tiles = 0;
@@ -127,11 +80,7 @@ func make_arctic_seas(heat_grid) :
 				heat_grid[y][x] <= 0.15 && rand % 4 == 0 ||
 				heat_grid[y][x] <= 0.1 && rand % 2 == 0 ||
 				heat_grid[y][x] <= 0.05) :
-					var new_tile;
-					if rand % 32 == 0 :
-						new_tile = ScarcesIcegraspedIslandsTile.new(grid[y][x].x, grid[y][x].y, grid[y][x].id);
-					else :
-						new_tile = IceCapTile.new(grid[y][x].x, grid[y][x].y, grid[y][x].id);
+					var new_tile =  IceCapTile.new(grid[y][x].x, grid[y][x].y, grid[y][x].id);
 					replace_tile(grid[y][x].x, grid[y][x].y, new_tile);
 
 func neighbours_are_land_tile(start_x : int, start_y : int, x : int, y : int, recursion_ct : int) :
@@ -210,7 +159,6 @@ func display_map(top_left_x : int, top_left_y : int, visible_tiles_in_pov_x : in
 	var x_index;
 	if visible_tiles_in_pov_y > GV.map_height :
 		visible_tiles_in_pov_y = GV.map_height;
-	#print("TL x : ", top_left_x, " | TL y : ", top_left_y, " | visible tiles in y : ", visible_tiles_in_pov_y)
 	while y <= top_left_y + (visible_tiles_in_pov_y) && y < GV.map_height :
 		it_count = 0;
 		x = top_left_x;
@@ -258,6 +206,10 @@ func create_map(heat_grid, humidity_grid, topographic_grid):
 			elif topographic_grid[y][x] > eternal_snow_threshold  && topographic_grid[y][x] > 0.75:
 				replace_tile(x, y, SnowyMountainTile.new(x, y, tile_id));
 				continue;
+				
+			if grid[y][x].isOneTileIsland(grid) :
+				replace_tile(x, y, tile_maker.generate_one_tile_island(grid[y][x], self));
+				continue ;
 				
 			var Biggest_hight_diff = grid[y][x].getBiggestNeigbhourHeightDifference(grid, topographic_grid);
 			if Biggest_hight_diff > 0.20 || topographic_grid[y][x] > 0.75:
